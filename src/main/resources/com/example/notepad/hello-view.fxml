@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.VBox?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.Menu?>
+<?import com.sun.javafx.scene.control.ContextMenuContent.MenuBox?>
+<?import javafx.scene.control.MenuButton?>
+
+<?import javafx.scene.control.MenuItem?>
+
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.control.RadioMenuItem?>
+<?import javafx.scene.text.TextFlow?>
+<?import javafx.scene.control.cell.TextFieldTableCell?>
+<BorderPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.example.notepad.HelloController">
+    <top>
+        <MenuBar>
+            <Menu text="File">
+                <MenuItem text="New" onAction="#handleNew"/>
+                <MenuItem text="Open" onAction="#handleOpen"/>
+                <MenuItem text="Save" onAction="#handleSave"/>
+                <MenuItem text="Save as" onAction="#handleSaveAS"/>
+                <MenuItem text="Print..." onAction="#handlePrint"/>
+                <MenuItem text="Exit" onAction="#handleExit"/>
+            </Menu>
+
+            <Menu text="Edit">
+                <MenuItem text="Date &amp; Time" onAction="#handleNew"/>
+                <MenuItem text="Select all" onAction="#handleOpen"/>
+                <MenuItem text="Go to" onAction="#handleSave"/>
+                <MenuItem text="Replace" onAction="#handleSaveAS"/>
+                <MenuItem text="Copy-Paste" onAction="#handlePrint"/>
+                <MenuItem text="Delete" onAction="#handleExit"/>
+                <MenuItem text="Cut" onAction="#handleExit"/>
+            </Menu>
+
+            <Menu text="Format">
+                <MenuItem text="Font" onAction="#handleNew"/>
+                <RadioMenuItem text="Word Wrap" onAction="#handleOpen"/>
+            </Menu>
+            <Menu text="View">
+                <RadioMenuItem text="On-Screen keyboard" onAction="#handleNew"/>
+            </Menu>
+            <Menu text="Help">
+                <MenuItem text="About Notepad" onAction="#handleNew"/>
+                <MenuItem text="View help" onAction="#handleOpen"/>
+            </Menu>
+        </MenuBar>
+    </top>
+    <center>
+        <HBox>
+            <VBox fx:id="editorContainer"/>
+        </HBox>
+    </center>
+</BorderPane>
+
