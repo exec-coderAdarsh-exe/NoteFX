@@ -1,61 +1,60 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.control.MenuBar?>
-<?import javafx.scene.control.Menu?>
-<?import com.sun.javafx.scene.control.ContextMenuContent.MenuBox?>
-<?import javafx.scene.control.MenuButton?>
-
-<?import javafx.scene.control.MenuItem?>
-
-<?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.control.RadioMenuItem?>
-<?import javafx.scene.text.TextFlow?>
-<?import javafx.scene.control.cell.TextFieldTableCell?>
 <BorderPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.example.notepad.HelloController">
     <top>
         <MenuBar>
             <Menu text="File">
-                <MenuItem text="New" onAction="#handleNew"/>
-                <MenuItem text="Open" onAction="#handleOpen"/>
-                <MenuItem text="Save" onAction="#handleSave"/>
-                <MenuItem text="Save as" onAction="#handleSaveAS"/>
-                <MenuItem text="Print..." onAction="#handlePrint"/>
-                <MenuItem text="Exit" onAction="#handleExit"/>
+                <MenuItem text="New" onAction="#FileMenu_New"/>
+                <MenuItem text="Open" onAction="#FileMenu_Open"/>
+                <MenuItem text="Save" onAction="#FileMenu_Save"/>
+                <MenuItem text="Save as" onAction="#FileMenu_SaveAS"/>
+                <MenuItem text="Print..." onAction="#FileMenu_Print"/>
+                <MenuItem text="Exit" onAction="#FileMenu_Exit"/>
             </Menu>
 
             <Menu text="Edit">
-                <MenuItem text="Date &amp; Time" onAction="#handleNew"/>
-                <MenuItem text="Select all" onAction="#handleOpen"/>
-                <MenuItem text="Go to" onAction="#handleSave"/>
-                <MenuItem text="Replace" onAction="#handleSaveAS"/>
-                <MenuItem text="Copy-Paste" onAction="#handlePrint"/>
-                <MenuItem text="Delete" onAction="#handleExit"/>
-                <MenuItem text="Cut" onAction="#handleExit"/>
+                <MenuItem text="Date &amp; Time" onAction="#EditMenu_date_time"/>
+                <MenuItem text="Select all" onAction="#EditMenu_selectAll"/>
+                <MenuItem text="Go to" onAction="#EditMenu_goTo"/>
+                <MenuItem text="Replace" onAction="#EditMenu_replace"/>
+                <MenuItem text="Copy-Paste" onAction="#EditMenu_copy_paste"/>
+                <MenuItem text="Delete" onAction="#EditMenu_delete"/>
+                <MenuItem text="Cut" onAction="#EditMenu_cut"/>
+                <MenuItem text="Cut" onAction="#EditMenu_copy"/>
+                <MenuItem text="Cut" onAction="#EditMenu_paste"/>
             </Menu>
 
             <Menu text="Format">
-                <MenuItem text="Font" onAction="#handleNew"/>
-                <RadioMenuItem text="Word Wrap" onAction="#handleOpen"/>
+                <MenuItem text="Font" onAction="#FormatMenu_font"/>
+                <RadioMenuItem text="Word Wrap" onAction="#FormatMenu_wordWrap"/>
             </Menu>
             <Menu text="View">
-                <RadioMenuItem text="On-Screen keyboard" onAction="#handleNew"/>
+                <RadioMenuItem text="On-Screen keyboard" onAction="#ViewMenu_on_screen_kb"/>
             </Menu>
             <Menu text="Help">
-                <MenuItem text="About Notepad" onAction="#handleNew"/>
-                <MenuItem text="View help" onAction="#handleOpen"/>
+                <MenuItem text="About Notepad" onAction="#HelpMenu_aboutNtpd"/>
+                <MenuItem text="View help" onAction="#HelpMenu_viewHelp"/>
+            </Menu>
+            <Menu text="Highlights">
+                <MenuItem text="Yellow" onAction="#highlightsMenu_yellow"/>
+                <MenuItem text="Green" onAction="#highlightsMenu_green"/>
+                <MenuItem text="Red" onAction="#highlightsMenu_red"/>
             </Menu>
         </MenuBar>
+
     </top>
     <center>
         <HBox>
             <VBox fx:id="editorContainer"/>
         </HBox>
     </center>
+    <right>
+        <VBox minHeight="1800"/>
+    </right>
 </BorderPane>
 
