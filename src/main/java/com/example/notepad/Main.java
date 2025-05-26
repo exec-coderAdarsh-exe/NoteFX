@@ -7,20 +7,25 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 
-public class HelloApplication extends Application {
-    public static int width=800,height=450;
+/*
+    Launching everything and attaching to the stage.
+ */
+
+public class Main extends Application {
+
+    public static final int width=800;
+    public static final int height=450;
+
     @Override
     public void start(Stage stage) throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("hello-view.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("main_ui.fxml"));
         Scene scene = new Scene(fxmlLoader.load(), width, height);
         stage.setTitle("Notepad");
-
-
         stage.setScene(scene);
         stage.show();
     }
 
-    public static void main(String[] args) {
+    public Main() {
         launch();
     }
 }

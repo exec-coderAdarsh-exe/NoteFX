@@ -5,9 +5,13 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.example.notepad.HelloController">
+<!--    Handles the main stage ui   -->
+
+<BorderPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.example.notepad.core">
     <top>
         <MenuBar>
+
+            // File menu
             <Menu text="File">
                 <MenuItem text="New" onAction="#FileMenu_New"/>
                 <MenuItem text="Open" onAction="#FileMenu_Open"/>
@@ -17,6 +21,7 @@
                 <MenuItem text="Exit" onAction="#FileMenu_Exit"/>
             </Menu>
 
+            // Edit menu
             <Menu text="Edit">
                 <MenuItem text="Date &amp; Time" onAction="#EditMenu_date_time"/>
                 <MenuItem text="Select all" onAction="#EditMenu_selectAll"/>
@@ -29,25 +34,30 @@
                 <MenuItem text="Cut" onAction="#EditMenu_paste"/>
             </Menu>
 
+            // Format menu
             <Menu text="Format">
                 <MenuItem text="Font" onAction="#FormatMenu_font"/>
                 <RadioMenuItem text="Word Wrap" onAction="#FormatMenu_wordWrap"/>
             </Menu>
+
+            // View menu
             <Menu text="View">
                 <RadioMenuItem text="On-Screen keyboard" onAction="#ViewMenu_on_screen_kb"/>
             </Menu>
-            <Menu text="Help">
-                <MenuItem text="About Notepad" onAction="#HelpMenu_aboutNtpd"/>
-                <MenuItem text="View help" onAction="#HelpMenu_viewHelp"/>
-            </Menu>
+
+            // Help menu
+            <fx:include source="help_ui.fxml"/>
+
+            // Highlights menu
             <Menu text="Highlights">
                 <MenuItem text="Yellow" onAction="#highlightsMenu_yellow"/>
                 <MenuItem text="Green" onAction="#highlightsMenu_green"/>
                 <MenuItem text="Red" onAction="#highlightsMenu_red"/>
             </Menu>
-        </MenuBar>
 
+        </MenuBar>
     </top>
+
     <center>
         <HBox>
             <VBox fx:id="editorContainer"/>

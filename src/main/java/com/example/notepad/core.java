@@ -1,7 +1,10 @@
 package com.example.notepad;
 
+/*
+    Handling everything and combining them.
+ */
+
 import javafx.application.Platform;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.print.PrinterJob;
 import javafx.scene.Node;
@@ -15,22 +18,23 @@ import java.io.*;
 import java.util.*;
 import java.util.function.IntFunction;
 
-public class HelloController {
+@SuppressWarnings("ALL")
+public class core {
 
     @FXML
-    private VBox editorContainer;
+    public static VBox editorContainer;
 
-    private CodeArea codeArea;
-    private File currentFile = null;
-    private boolean isModified = false;
+    public static CodeArea codeArea;
+    public static File currentFile = null;
+    public static boolean isModified = false;
 
-    private final Map<Integer, String> lineColorMap = new HashMap<>();
-    private final Map<String, List<Integer>> colorGroups = new HashMap<>() {{
+    public static final Map<Integer, String> lineColorMap = new HashMap<>();
+    public static final Map<String, List<Integer>> colorGroups = new HashMap<>() {{
         put("YELLOW", new ArrayList<>());
         put("GREEN", new ArrayList<>());
         put("RED", new ArrayList<>());
     }};
-    private final List<String> colorCycle = Arrays.asList("YELLOW", "GREEN", "RED", "NONE");
+    public static final List<String> colorCycle = Arrays.asList("YELLOW", "GREEN", "RED", "NONE");
 
     @FXML
     public void initialize() {
@@ -46,7 +50,7 @@ public class HelloController {
         codeArea.textProperty().addListener((_, _, _) -> isModified = true);
     }
 
-    private IntFunction<Node> lineNumberGraphicFactory() {
+    public static IntFunction<Node> lineNumberGraphicFactory() {
         return line -> {
             int lineIndex = line + 1;
             Label label = new Label(String.valueOf(lineIndex));
@@ -54,7 +58,7 @@ public class HelloController {
             label.setMinWidth(40);
             label.setPadding(new javafx.geometry.Insets(2, 8, 2, 8));
 
-            label.setOnMouseClicked(e -> {
+            label.setOnMouseClicked(_ -> {
                 String current = lineColorMap.get(lineIndex);
                 String next = getNextColor(current);
 
@@ -76,13 +80,13 @@ public class HelloController {
         };
     }
 
-    private String getNextColor(String current) {
-        if (current == null || !colorCycle.contains(current)) return colorCycle.get(0);
+    private static String getNextColor(String current) {
+        if (current == null || !colorCycle.contains(current)) return colorCycle.getFirst();
         int index = colorCycle.indexOf(current);
         return colorCycle.get((index + 1) % colorCycle.size());
     }
 
-    private String getLineNumberStyle(int line) {
+    private static String getLineNumberStyle(int line) {
         return switch (lineColorMap.getOrDefault(line, "NONE")) {
             case "YELLOW" -> "-fx-background-color: yellow; -fx-text-fill: black;";
             case "GREEN" -> "-fx-background-color: lightgreen; -fx-text-fill: black;";
@@ -91,8 +95,9 @@ public class HelloController {
         };
     }
 
-    public void FileMenu_New(ActionEvent event) {
-        if (hasUnsavedChanges() && confirmAndSaveIfNeeded(event)) return;
+    //  OptFile_handler.javaprivate
+    public void FileMenu_New() {
+        if (hasUnsavedChanges() && confirmAndSaveIfNeeded()) return;
 
         codeArea.clear();
         lineColorMap.clear();
@@ -103,8 +108,8 @@ public class HelloController {
         codeArea.setParagraphGraphicFactory(lineNumberGraphicFactory());
     }
 
-    public void FileMenu_Open(ActionEvent event) {
-        if (hasUnsavedChanges() && confirmAndSaveIfNeeded(event)) return;
+    public void FileMenu_Open() {
+        if (hasUnsavedChanges() && confirmAndSaveIfNeeded()) return;
 
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Open File");
@@ -133,15 +138,15 @@ public class HelloController {
         }
     }
 
-    public void FileMenu_Save(ActionEvent event) {
+    public void FileMenu_Save() {
         if (currentFile == null) {
-            FileMenu_SaveAS(event);
+            FileMenu_SaveAS();
         } else {
             saveToFile(currentFile);
         }
     }
 
-    public void FileMenu_SaveAS(ActionEvent event) {
+    public void FileMenu_SaveAS() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Save File As");
         fileChooser.getExtensionFilters().add(
@@ -164,7 +169,7 @@ public class HelloController {
         }
     }
 
-    public void FileMenu_Print(ActionEvent event) {
+    public void FileMenu_Print() {
         PrinterJob job = PrinterJob.createPrinterJob();
         if (job == null) {
             showError("Print Error", "Printer unavailable", "No printer found.");
@@ -180,9 +185,9 @@ public class HelloController {
         }
     }
 
-    public void FileMenu_Exit(ActionEvent event) {
+    public void FileMenu_Exit() {
         if (hasUnsavedChanges()) {
-            if (confirmAndSaveIfNeeded(event)) return;
+            if (confirmAndSaveIfNeeded()) return;
         }
         Platform.exit();
     }
@@ -191,7 +196,7 @@ public class HelloController {
         return isModified;
     }
 
-    private boolean confirmAndSaveIfNeeded(ActionEvent event) {
+    private boolean confirmAndSaveIfNeeded() {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("Unsaved Changes");
         alert.setHeaderText("You have unsaved changes. Save before proceeding?");
@@ -204,7 +209,7 @@ public class HelloController {
         Optional<ButtonType> result = alert.showAndWait();
         if (result.isPresent()) {
             if (result.get().getText().equals("Save")) {
-                FileMenu_Save(event);
+                FileMenu_Save();
                 return false;
             } else return result.get().getText().equals("Cancel");
         }
@@ -220,9 +225,9 @@ public class HelloController {
     }
 
     // Highlight menus
-    public void highlightsMenu_yellow(ActionEvent event) { showHighlightDialog("YELLOW"); }
-    public void highlightsMenu_green(ActionEvent event) { showHighlightDialog("GREEN"); }
-    public void highlightsMenu_red(ActionEvent event) { showHighlightDialog("RED"); }
+    public void highlightsMenu_yellow() { showHighlightDialog("YELLOW"); }
+    public void highlightsMenu_green() { showHighlightDialog("GREEN"); }
+    public void highlightsMenu_red() { showHighlightDialog("RED"); }
 
     private void showHighlightDialog(String color) {
         List<Integer> lines = colorGroups.getOrDefault(color, List.of());
@@ -243,18 +248,19 @@ public class HelloController {
     }
 
     // Stubbed methods (optional to implement later)
-    public void EditMenu_date_time(ActionEvent e) {}
-    public void EditMenu_selectAll(ActionEvent e) { codeArea.selectAll(); }
-    public void EditMenu_goTo(ActionEvent e) {}
-    public void EditMenu_replace(ActionEvent e) {}
-    public void EditMenu_copy_paste(ActionEvent e) {}
-    public void EditMenu_delete(ActionEvent e) { codeArea.deleteText(codeArea.getSelection()); }
-    public void EditMenu_cut(ActionEvent e) { codeArea.cut(); }
-    public void EditMenu_copy(ActionEvent e) { codeArea.copy(); }
-    public void EditMenu_paste(ActionEvent e) { codeArea.paste(); }
-    public void FormatMenu_font(ActionEvent e) {}
-    public void FormatMenu_wordWrap(ActionEvent e) {}
-    public void ViewMenu_on_screen_kb(ActionEvent e) {}
-    public void HelpMenu_aboutNtpd(ActionEvent e) {}
-    public void HelpMenu_viewHelp(ActionEvent e) {}
+    public void EditMenu_date_time() {
+    }
+    public void EditMenu_selectAll() { codeArea.selectAll(); }
+    public void EditMenu_goTo() {}
+    public void EditMenu_replace() {}
+    public void EditMenu_copy_paste() {
+    }
+    public void EditMenu_delete() { codeArea.deleteText(codeArea.getSelection()); }
+    public void EditMenu_cut() { codeArea.cut(); }
+    public void EditMenu_copy() { codeArea.copy(); }
+    public void EditMenu_paste() { codeArea.paste(); }
+    public void FormatMenu_font() {}
+    public void FormatMenu_wordWrap() {}
+    public void ViewMenu_on_screen_kb() {}
+
 }
