@@ -1,11 +1,6 @@
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuItem?>
 
-<!--    Handles the help ui   -->
-
-
 <Menu xmlns:fx="http://javafx.com/fxml" text="Help" fx:controller="com.example.notepad.OptHelp_handler">
-    <MenuItem text="Cut" onAction="#handleCut"/>
-    <MenuItem text="Copy" onAction="#handleCopy"/>
-    <MenuItem text="Paste" onAction="#handlePaste"/>
+    <MenuItem text="Help Center" onAction="#show"/>
 </Menu>

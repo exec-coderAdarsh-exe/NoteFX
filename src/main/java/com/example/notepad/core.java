@@ -2,6 +2,7 @@ package com.example.notepad;
 
 import javafx.fxml.FXML;
 import javafx.scene.Node;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
@@ -31,6 +32,7 @@ public class core {
     private OptFile_handler fileHandler;
     private OptEdit_handler editHandler;
 
+
     @FXML
     public void initialize() {
         // Set up CodeArea with styling and line numbering
@@ -38,7 +40,7 @@ public class core {
         codeArea.setFocusTraversable(true);
         codeArea.setStyle("-fx-font-family: 'Consolas'; -fx-font-size: 14px;");
         codeArea.setParagraphGraphicFactory(createLineNumberFactory());
-        codeArea.textProperty().addListener((obs, oldText, newText) -> isModified = true);
+        codeArea.textProperty().addListener((_, _, _) -> isModified = true);
 
         // Place CodeArea in a VirtualizedScrollPane
         VirtualizedScrollPane<CodeArea> vsPane = new VirtualizedScrollPane<>(codeArea);
@@ -46,6 +48,8 @@ public class core {
         // Initialize file handler
         fileHandler = new OptFile_handler(this);
         editHandler = new OptEdit_handler(this);
+        new suggestion_handler(codeArea);
+
     }
 
 
@@ -58,7 +62,7 @@ public class core {
             label.setPadding(new javafx.geometry.Insets(2, 8, 2, 8));
             label.setStyle(getLineNumberStyle(lineIndex));
 
-            label.setOnMouseClicked(event -> {
+            label.setOnMouseClicked(_ -> {
                 String current = lineColorMap.get(lineIndex);
                 String next = getNextColor(current);
 
@@ -172,4 +176,53 @@ public class core {
     public void ViewMenu_on_screen_kb() {
 
     }
+
+    public void registerShortcutKeys(Scene scene) {
+        shortcutKey_handler shortcutHandler = new shortcutKey_handler(new shortcutKey_handler.ShortcutListener() {
+            @Override
+            public void onNewFile() {
+                fileHandler.newFile();
+            }
+
+            @Override
+            public void onSave() {
+                fileHandler.saveFile();
+            }
+
+            @Override
+            public void onOpen() {
+                fileHandler.openFile();
+            }
+
+            @Override
+            public void onFind() {
+                showFindDialog();
+            }
+
+            @Override
+            public void onUndo() {
+                if (codeArea.isUndoAvailable()) {
+                    codeArea.undo();
+                }
+            }
+
+            @Override
+            public void onRedo() {
+                if (codeArea.isRedoAvailable()) {
+                    codeArea.redo();
+                }
+            }
+        });
+
+        shortcutHandler.registerShortcuts(scene);
+    }
+    private void showFindDialog() {
+        // Your implementation for the Find dialog
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Find");
+        alert.setHeaderText(null);
+        alert.setContentText("Find dialog not implemented yet.");
+        alert.showAndWait();
+    }
+
 }

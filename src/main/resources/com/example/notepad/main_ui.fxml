@@ -1,12 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.VBox?>
-
 <!--    Handles the main stage ui   -->
 
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.BorderPane?>
 <BorderPane fx:id="editorContainer" xmlns:fx="http://javafx.com/fxml" fx:controller="com.example.notepad.core">
     <top>
         <MenuBar>
@@ -21,17 +18,17 @@
                 <MenuItem text="Exit" onAction="#FileMenu_Exit"/>
             </Menu>
 
-<!--            // Edit menu-->
+            <!--            // Edit menu-->
             <Menu text="Edit">
                 <MenuItem text="Date &amp; Time" onAction="#EditMenu_date_time"/>
                 <MenuItem text="Select all" onAction="#EditMenu_selectAll"/>
                 <MenuItem text="Go to" onAction="#EditMenu_goTo"/>
                 <MenuItem text="Replace" onAction="#EditMenu_replace"/>
-                <MenuItem text="Copy-Paste" onAction="#EditMenu_copy_paste"/>
+                <MenuItem text="Duplicate" onAction="#EditMenu_copy_paste"/>
                 <MenuItem text="Delete" onAction="#EditMenu_delete"/>
                 <MenuItem text="Cut" onAction="#EditMenu_cut"/>
-                <MenuItem text="Cut" onAction="#EditMenu_copy"/>
-                <MenuItem text="Cut" onAction="#EditMenu_paste"/>
+                <MenuItem text="Copy" onAction="#EditMenu_copy"/>
+                <MenuItem text="Paste" onAction="#EditMenu_paste"/>
             </Menu>
 
             <!--            // Format menu-->

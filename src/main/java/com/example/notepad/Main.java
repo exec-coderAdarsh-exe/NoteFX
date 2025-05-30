@@ -20,10 +20,18 @@ public class Main extends Application {
     public void start(Stage stage) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("main_ui.fxml"));
         Scene scene = new Scene(fxmlLoader.load(), width, height);
+
+        // Get the controller instance
+        core controller = fxmlLoader.getController();
+
+        // Register shortcut keys with the scene
+        controller.registerShortcutKeys(scene);
+
         stage.setTitle("Notepad");
         stage.setScene(scene);
         stage.show();
     }
+
 
     public static void main(String[] args) {
         launch(args);
