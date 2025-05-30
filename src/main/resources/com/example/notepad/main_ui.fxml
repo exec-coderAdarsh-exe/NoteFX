@@ -7,11 +7,11 @@
 
 <!--    Handles the main stage ui   -->
 
-<BorderPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.example.notepad.core">
+<BorderPane fx:id="editorContainer" xmlns:fx="http://javafx.com/fxml" fx:controller="com.example.notepad.core">
     <top>
         <MenuBar>
 
-<!--            // File menu-->
+            <!--            // File menu-->
             <Menu text="File">
                 <MenuItem text="New" onAction="#FileMenu_New"/>
                 <MenuItem text="Open" onAction="#FileMenu_Open"/>
@@ -22,33 +22,33 @@
             </Menu>
 
 <!--            // Edit menu-->
-<!--            <Menu text="Edit">-->
-<!--                <MenuItem text="Date &amp; Time" onAction="#EditMenu_date_time"/>-->
-<!--                <MenuItem text="Select all" onAction="#EditMenu_selectAll"/>-->
-<!--                <MenuItem text="Go to" onAction="#EditMenu_goTo"/>-->
-<!--                <MenuItem text="Replace" onAction="#EditMenu_replace"/>-->
-<!--                <MenuItem text="Copy-Paste" onAction="#EditMenu_copy_paste"/>-->
-<!--                <MenuItem text="Delete" onAction="#EditMenu_delete"/>-->
-<!--                <MenuItem text="Cut" onAction="#EditMenu_cut"/>-->
-<!--                <MenuItem text="Cut" onAction="#EditMenu_copy"/>-->
-<!--                <MenuItem text="Cut" onAction="#EditMenu_paste"/>-->
-<!--            </Menu>-->
+            <Menu text="Edit">
+                <MenuItem text="Date &amp; Time" onAction="#EditMenu_date_time"/>
+                <MenuItem text="Select all" onAction="#EditMenu_selectAll"/>
+                <MenuItem text="Go to" onAction="#EditMenu_goTo"/>
+                <MenuItem text="Replace" onAction="#EditMenu_replace"/>
+                <MenuItem text="Copy-Paste" onAction="#EditMenu_copy_paste"/>
+                <MenuItem text="Delete" onAction="#EditMenu_delete"/>
+                <MenuItem text="Cut" onAction="#EditMenu_cut"/>
+                <MenuItem text="Cut" onAction="#EditMenu_copy"/>
+                <MenuItem text="Cut" onAction="#EditMenu_paste"/>
+            </Menu>
 
-<!--&lt;!&ndash;            // Format menu&ndash;&gt;-->
-<!--            <Menu text="Format">-->
-<!--                <MenuItem text="Font" onAction="#FormatMenu_font"/>-->
-<!--                <RadioMenuItem text="Word Wrap" onAction="#FormatMenu_wordWrap"/>-->
-<!--            </Menu>-->
+            <!--            // Format menu-->
+            <Menu text="Format">
+                <MenuItem text="Font" onAction="#FormatMenu_font"/>
+                <RadioMenuItem text="Word Wrap" onAction="#FormatMenu_wordWrap"/>
+            </Menu>
 
-<!--&lt;!&ndash;            // View menu&ndash;&gt;-->
-<!--            <Menu text="View">-->
-<!--                <RadioMenuItem text="On-Screen keyboard" onAction="#ViewMenu_on_screen_kb"/>-->
-<!--            </Menu>-->
+            <!--            // View menu-->
+            <Menu text="View">
+                <RadioMenuItem text="On-Screen keyboard" onAction="#ViewMenu_on_screen_kb"/>
+            </Menu>
 
-<!--            // Help menu-->
+            <!--                        // Help menu-->
             <fx:include source="help_ui.fxml"/>
 
-<!--            // Highlights menu-->
+            <!--            // Highlights menu-->
             <Menu text="Highlights">
                 <MenuItem text="Yellow" onAction="#highlightsMenu_yellow"/>
                 <MenuItem text="Green" onAction="#highlightsMenu_green"/>
@@ -58,10 +58,22 @@
         </MenuBar>
     </top>
 
-    <center>
-        <HBox>
-            <VBox fx:id="editorContainer"/>
-        </HBox>
-    </center>
 </BorderPane>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

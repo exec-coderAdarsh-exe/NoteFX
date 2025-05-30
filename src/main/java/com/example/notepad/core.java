@@ -4,9 +4,7 @@ import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.BorderPane;
 import org.fxmisc.flowless.VirtualizedScrollPane;
 import org.fxmisc.richtext.CodeArea;
 
@@ -16,9 +14,9 @@ import java.util.*;
 public class core {
 
     @FXML
-    private VBox editorContainer;
+    private BorderPane editorContainer;
 
-    private CodeArea codeArea;
+    public static CodeArea codeArea;
     private File currentFile = null;
     private boolean isModified = false;
 
@@ -31,6 +29,7 @@ public class core {
     private final List<String> colorCycle = List.of("YELLOW", "GREEN", "RED", "NONE");
 
     private OptFile_handler fileHandler;
+    private OptEdit_handler editHandler;
 
     @FXML
     public void initialize() {
@@ -43,18 +42,13 @@ public class core {
 
         // Place CodeArea in a VirtualizedScrollPane
         VirtualizedScrollPane<CodeArea> vsPane = new VirtualizedScrollPane<>(codeArea);
-
-        // Bind the scroll pane size to the container for responsiveness
-        vsPane.prefWidthProperty().bind(editorContainer.widthProperty());
-        vsPane.prefHeightProperty().bind(editorContainer.heightProperty());
-
-        VBox.setVgrow(vsPane, Priority.ALWAYS);
-        HBox.setHgrow(vsPane, Priority.ALWAYS);
-
-        editorContainer.getChildren().add(vsPane);
-
+        editorContainer.setCenter(vsPane);
+        // Initialize file handler
         fileHandler = new OptFile_handler(this);
+        editHandler = new OptEdit_handler(this);
     }
+
+
 
     public java.util.function.IntFunction<Node> createLineNumberFactory() {
         return line -> {
@@ -87,7 +81,7 @@ public class core {
 
     private String getNextColor(String current) {
         // Use get(0) instead of getFirst()
-        if (current == null || !colorCycle.contains(current)) return colorCycle.get(0);
+        if (current == null || !colorCycle.contains(current)) return colorCycle.getFirst();
         int index = colorCycle.indexOf(current);
         return colorCycle.get((index + 1) % colorCycle.size());
     }
@@ -136,9 +130,46 @@ public class core {
     public void setCurrentFile(File file) { this.currentFile = file; }
     public boolean isModified() { return isModified; }
     public void setModified(boolean value) { this.isModified = value; }
-    public VBox getEditorContainer() { return editorContainer; }
+    public BorderPane getEditorContainer() { return editorContainer; }
 
     public void refreshLineNumbers() {
         codeArea.setParagraphGraphicFactory(createLineNumberFactory());
+    }
+
+    public void EditMenu_date_time() { editHandler.EditMenu_date_time();
+    }
+
+    public void EditMenu_selectAll() { editHandler.EditMenu_selectAll();
+    }
+
+    public void EditMenu_goTo() { editHandler.EditMenu_goTo();
+    }
+
+    public void EditMenu_replace() { editHandler.EditMenu_replace();
+    }
+
+    public void EditMenu_copy_paste() { editHandler.EditMenu_copy_paste();
+    }
+
+    public void EditMenu_delete() { editHandler.EditMenu_delete();
+    }
+
+    public void EditMenu_cut() { editHandler.EditMenu_cut();
+    }
+
+    public void EditMenu_copy() { editHandler.EditMenu_copy();
+    }
+
+    public void EditMenu_paste() { editHandler.EditMenu_paste();
+    }
+
+    public void FormatMenu_font() {
+    }
+
+    public void FormatMenu_wordWrap() {
+    }
+
+    public void ViewMenu_on_screen_kb() {
+
     }
 }
