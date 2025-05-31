@@ -63,13 +63,9 @@ public class suggestion_handler {
     }
 
     private void attachListeners() {
-        // Use richtext CodeArea's text property listener to trigger suggestions on every text change
-        codeArea.textProperty().addListener((_, _, _) -> showSuggestionsIfNeeded());
+        codeArea.textProperty().addListener((obs, oldVal, newVal) -> showSuggestionsIfNeeded());
+        codeArea.caretPositionProperty().addListener((obs, oldVal, newVal) -> showSuggestionsIfNeeded());
 
-        // Also listen to caret position changes (keyboard or mouse movement)
-        codeArea.caretPositionProperty().addListener((_, _, _) -> showSuggestionsIfNeeded());
-
-        // Handle key presses for navigating suggestions or hiding popup
         codeArea.addEventFilter(KeyEvent.KEY_PRESSED, event -> {
             if (suggestionPopup.isShowing()) {
                 if (event.getCode() == KeyCode.DOWN) {
@@ -111,20 +107,10 @@ public class suggestion_handler {
         int caretPosition = codeArea.getCaretPosition();
         String textUpToCaret = codeArea.getText(0, caretPosition);
 
-        // Count previous word occurrences before caret
-        String[] wordsBeforeCaret = textUpToCaret.split("\\W+");
-        Map<String, Integer> freqBeforeCaret = new HashMap<>();
-        for (String word : wordsBeforeCaret) {
-            if (!word.isEmpty()) {
-                freqBeforeCaret.put(word, freqBeforeCaret.getOrDefault(word, 0) + 1);
-            }
-        }
-
-        List<String> matches = freqBeforeCaret.entrySet().stream()
-                .filter(entry -> entry.getKey().startsWith(prefix))
-                .filter(entry -> entry.getValue() >= 1) // Word appeared at least once before
-                .map(Map.Entry::getKey)
-                .sorted()
+        Set<String> uniqueWords = new LinkedHashSet<>(Arrays.asList(textUpToCaret.split("\\W+")));
+        List<String> matches = uniqueWords.stream()
+                .filter(word -> word.startsWith(prefix) && !word.equals(prefix))
+                .sorted(Comparator.comparingInt(word -> -Collections.frequency(Arrays.asList(textUpToCaret.split("\\W+")), word)))
                 .collect(Collectors.toList());
 
         if (matches.isEmpty()) {
@@ -135,24 +121,21 @@ public class suggestion_handler {
         suggestionList.getItems().setAll(matches);
         suggestionList.getSelectionModel().selectFirst();
 
+        codeArea.requestLayout(); // Ensure layout bounds are updated
+        codeArea.layout();
+
         Optional<Bounds> caretBoundsOpt = codeArea.getCaretBounds();
         if (caretBoundsOpt.isPresent()) {
             Bounds caretBounds = caretBoundsOpt.get();
             Point2D screenPos = codeArea.localToScreen(caretBounds.getMinX(), caretBounds.getMaxY());
 
             if (screenPos != null) {
-                double xOffset = 8;
-                double yOffset = 18;
+                double xOffset = 5;   // More appropriate small offset
+                double yOffset = 5;
                 suggestionPopup.show(codeArea, screenPos.getX() + xOffset, screenPos.getY() + yOffset);
-            }
-        } else {
-            Point2D screenPos = codeArea.localToScreen(0, codeArea.getHeight());
-            if (screenPos != null) {
-                suggestionPopup.show(codeArea, screenPos.getX(), screenPos.getY());
             }
         }
     }
-
 
     private void acceptSuggestion(String suggestion) {
         int caretPos = codeArea.getCaretPosition();
