@@ -1,11 +1,15 @@
 package com.example.notepad;
 
+import javafx.application.Platform;
+import javafx.fxml.FXML;
 import javafx.geometry.Bounds;
 import javafx.geometry.Point2D;
 import javafx.scene.control.ListView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
-import javafx.stage.Popup;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
+import org.fxmisc.flowless.VirtualizedScrollPane;
 import org.fxmisc.richtext.CodeArea;
 
 import java.util.*;
@@ -13,61 +17,56 @@ import java.util.stream.Collectors;
 
 public class suggestion_handler {
 
-    private final CodeArea codeArea;
-    private final Popup suggestionPopup;
-    private final ListView<String> suggestionList;
+    @FXML private StackPane editorRoot;
+    @FXML public ListView<String> suggestionList;
 
-    private static final int MAX_VISIBLE_ROWS = 8;
-    private static final double ROW_HEIGHT = 24;  // Approximate row height for ListView items
-    private static final double MAX_HEIGHT = MAX_VISIBLE_ROWS * ROW_HEIGHT;
+    private CodeArea codeArea;
 
-    public suggestion_handler(CodeArea codeArea) {
-        this.codeArea = codeArea;
+    public suggestion_handler() {
+        // Default constructor
+    }
+    @FXML
+    public void initialize() {
+        // This makes the suggestionBox itself transparent for mouse events
+        editorRoot.setMouseTransparent(true);
 
-        suggestionList = new ListView<>();
-        suggestionList.setMaxHeight(MAX_HEIGHT);
-        suggestionList.setPrefHeight(MAX_HEIGHT);
-        suggestionList.setFixedCellSize(ROW_HEIGHT);
-
-        suggestionPopup = new Popup();
-        suggestionPopup.setAutoHide(true);
-        suggestionPopup.getContent().add(suggestionList);
+        // But the ListView should still receive mouse events:
+        suggestionList.setMouseTransparent(false);
 
         configureSuggestionList();
-        attachListeners();
+        // Do NOT call attachListeners here, codeArea is null now
     }
 
+    public void setCodeArea(CodeArea area) {
+        this.codeArea = area;
+        attachListeners();  // safe to call now, codeArea is assigned
+    }
+
+
+
     private void configureSuggestionList() {
+        suggestionList.setFixedCellSize(24);
         suggestionList.setOnMouseClicked(event -> {
-            if (event.getClickCount() == 2) {
-                String selected = suggestionList.getSelectionModel().getSelectedItem();
-                if (selected != null) {
-                    acceptSuggestion(selected);
-                }
-            }
+            if (event.getClickCount() == 2) acceptSelected();
         });
 
         suggestionList.setOnKeyPressed(event -> {
-            if (event.getCode() == KeyCode.ENTER) {
-                String selected = suggestionList.getSelectionModel().getSelectedItem();
-                if (selected != null) {
-                    acceptSuggestion(selected);
-                }
-                event.consume();
-            } else if (event.getCode() == KeyCode.ESCAPE) {
-                hideSuggestions();
-                codeArea.requestFocus();
-                event.consume();
-            }
+            if (event.getCode() == KeyCode.ENTER) acceptSelected();
+            else if (event.getCode() == KeyCode.ESCAPE) hideSuggestions();
         });
     }
 
+    private boolean listenersAttached = false;
+
     private void attachListeners() {
-        codeArea.textProperty().addListener((obs, oldVal, newVal) -> showSuggestionsIfNeeded());
-        codeArea.caretPositionProperty().addListener((obs, oldVal, newVal) -> showSuggestionsIfNeeded());
+        if (listenersAttached || codeArea == null) return;
+        listenersAttached = true;
+
+        codeArea.textProperty().addListener((obs, oldText, newText) -> Platform.runLater(this::showSuggestionsIfNeeded));
+        codeArea.caretPositionProperty().addListener((obs, oldPos, newPos) -> Platform.runLater(this::showSuggestionsIfNeeded));
 
         codeArea.addEventFilter(KeyEvent.KEY_PRESSED, event -> {
-            if (suggestionPopup.isShowing()) {
+            if (suggestionList.isVisible()) {
                 if (event.getCode() == KeyCode.DOWN) {
                     suggestionList.requestFocus();
                     suggestionList.getSelectionModel().selectFirst();
@@ -80,83 +79,91 @@ public class suggestion_handler {
         });
     }
 
+
     private void showSuggestionsIfNeeded() {
+        System.out.println("Checking suggestions...");
         String prefix = getCurrentWordPrefix();
+        System.out.println("Current prefix: '" + prefix + "'");
         if (!prefix.isEmpty()) {
-            showSuggestions(prefix);
-        } else {
-            hideSuggestions();
+            List<String> matches = findMatches(prefix);
+            System.out.println("Matches found: " + matches);
+            if (!matches.isEmpty()) {
+                suggestionList.getItems().setAll(matches);
+                suggestionList.getSelectionModel().selectFirst();
+                suggestionList.setVisible(true);
+                suggestionList.setManaged(true);
+                positionSuggestionBox();
+                return;
+            }
         }
+        hideSuggestions();
     }
+
 
     private String getCurrentWordPrefix() {
         int caretPos = codeArea.getCaretPosition();
         if (caretPos == 0) return "";
-
-        String textUpToCaret = codeArea.getText(0, caretPos);
-        int i = textUpToCaret.length() - 1;
-
-        while (i >= 0 && Character.isLetterOrDigit(textUpToCaret.charAt(i))) {
-            i--;
-        }
-
-        return textUpToCaret.substring(i + 1);
+        String text = codeArea.getText(0, caretPos);
+        int i = text.length() - 1;
+        while (i >= 0 && Character.isLetterOrDigit(text.charAt(i))) i--;
+        return text.substring(i + 1);
     }
 
-    private void showSuggestions(String prefix) {
-        int caretPosition = codeArea.getCaretPosition();
-        String textUpToCaret = codeArea.getText(0, caretPosition);
-
-        Set<String> uniqueWords = new LinkedHashSet<>(Arrays.asList(textUpToCaret.split("\\W+")));
-        List<String> matches = uniqueWords.stream()
-                .filter(word -> word.startsWith(prefix) && !word.equals(prefix))
-                .sorted(Comparator.comparingInt(word -> -Collections.frequency(Arrays.asList(textUpToCaret.split("\\W+")), word)))
-                .collect(Collectors.toList());
-
-        if (matches.isEmpty()) {
-            hideSuggestions();
-            return;
-        }
-
-        suggestionList.getItems().setAll(matches);
-        suggestionList.getSelectionModel().selectFirst();
-
-        codeArea.requestLayout(); // Ensure layout bounds are updated
-        codeArea.layout();
-
-        Optional<Bounds> caretBoundsOpt = codeArea.getCaretBounds();
-        if (caretBoundsOpt.isPresent()) {
-            Bounds caretBounds = caretBoundsOpt.get();
-            Point2D screenPos = codeArea.localToScreen(caretBounds.getMinX(), caretBounds.getMaxY());
-
-            if (screenPos != null) {
-                double xOffset = 5;   // More appropriate small offset
-                double yOffset = 5;
-                suggestionPopup.show(codeArea, screenPos.getX() + xOffset, screenPos.getY() + yOffset);
-            }
-        }
-    }
-
-    private void acceptSuggestion(String suggestion) {
-        int caretPos = codeArea.getCaretPosition();
+    private List<String> findMatches(String prefix) {
         String text = codeArea.getText();
+        Set<String> words = new HashSet<>(Arrays.asList(text.split("\\W+")));
+        return words.stream()
+                .filter(w -> !w.equals(prefix) && w.startsWith(prefix))
+                .sorted()
+                .collect(Collectors.toList());
+    }
 
-        int start = caretPos - 1;
-        while (start >= 0 && Character.isLetterOrDigit(text.charAt(start))) {
-            start--;
+    private void positionSuggestionBox() {
+        int paragraphIndex = codeArea.getCurrentParagraph();
+        Optional<Bounds> paragraphBoundsOpt = codeArea.getParagraphBoundsOnScreen(paragraphIndex);
+
+        paragraphBoundsOpt.ifPresent(bounds -> {
+            // bounds are in screen coordinates (x, y, width, height)
+            // Convert the screen coordinates to local coordinates relative to editorRoot
+            Point2D localPoint = editorRoot.screenToLocal(bounds.getMinX(), bounds.getMaxY());
+
+            // Add a small vertical padding to place the suggestion box below the line
+            double verticalPadding = 40; // pixels, adjust as needed
+
+            suggestionList.relocate(localPoint.getX(), localPoint.getY() + verticalPadding);
+            suggestionList.toFront();
+        });
+    }
+
+
+
+
+
+    private void acceptSelected() {
+        String selected = suggestionList.getSelectionModel().getSelectedItem();
+        if (selected != null) {
+            int caretPos = codeArea.getCaretPosition();
+            int start = caretPos - 1;
+            String text = codeArea.getText();
+            while (start >= 0 && Character.isLetterOrDigit(text.charAt(start))) start--;
+            start++;
+            codeArea.replaceText(start, caretPos, selected);
+            codeArea.moveTo(start + selected.length());
         }
-        start++;
-
-        codeArea.replaceText(start, caretPos, suggestion);
-        codeArea.moveTo(start + suggestion.length());
-
         hideSuggestions();
         codeArea.requestFocus();
     }
 
-    private void hideSuggestions() {
-        if (suggestionPopup.isShowing()) {
-            suggestionPopup.hide();
-        }
+    private void showSuggestions() {
+        suggestionList.setVisible(true);
+        suggestionList.setManaged(true);
+        editorRoot.setMouseTransparent(false); // allow suggestion box to receive events
     }
+
+    private void hideSuggestions() {
+        suggestionList.setVisible(false);
+        suggestionList.setManaged(false);
+        editorRoot.setMouseTransparent(true);  // let events pass through to CodeArea
+    }
+
 }

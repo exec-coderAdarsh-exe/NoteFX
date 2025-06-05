@@ -6,6 +6,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.StackPane;
 import org.fxmisc.flowless.VirtualizedScrollPane;
 import org.fxmisc.richtext.CodeArea;
 
@@ -14,8 +15,16 @@ import java.util.*;
 
 public class core {
 
+    public StackPane suggestionBox;
     @FXML
     private BorderPane editorContainer;
+    @FXML
+    private suggestion_handler suggestionBoxController; // This binds via fx:id="suggestionBox"
+    @FXML
+    private StackPane editorStack;
+
+
+
 
     public static CodeArea codeArea;
     private File currentFile = null;
@@ -42,15 +51,17 @@ public class core {
         codeArea.setParagraphGraphicFactory(createLineNumberFactory());
         codeArea.textProperty().addListener((_, _, _) -> isModified = true);
 
-        // Place CodeArea in a VirtualizedScrollPane
         VirtualizedScrollPane<CodeArea> vsPane = new VirtualizedScrollPane<>(codeArea);
-        editorContainer.setCenter(vsPane);
-        // Initialize file handler
+        editorStack.getChildren().addFirst(vsPane);
+
+        // Bind CodeArea to suggestion handler
+        suggestionBoxController.setCodeArea(codeArea);
+
+        // Initialize handlers
         fileHandler = new OptFile_handler(this);
         editHandler = new OptEdit_handler(this);
-        new suggestion_handler(codeArea);
-
     }
+
 
 
 

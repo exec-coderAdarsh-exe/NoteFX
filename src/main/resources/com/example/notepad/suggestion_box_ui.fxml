@@ -1,0 +1,8 @@
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.control.ListView?>
+<StackPane fx:id="editorRoot" xmlns:fx="http://javafx.com/fxml" fx:controller="com.example.notepad.suggestion_handler">
+    <VBox fx:id="codeContainer">
+        <ListView fx:id="suggestionList" visible="false" managed="false" />
+    </VBox>
+</StackPane>
