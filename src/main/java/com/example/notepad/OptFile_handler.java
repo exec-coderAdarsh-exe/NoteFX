@@ -8,11 +8,16 @@ import javafx.scene.control.ButtonType;
 import javafx.stage.FileChooser;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.Optional;
 
 public class OptFile_handler {
 
     private final core controller;
+
 
     public OptFile_handler(core controller) {
         this.controller = controller;
@@ -58,6 +63,21 @@ public class OptFile_handler {
         else saveToFile(file);
     }
 
+    public void draftSave(Path originalPath){
+        try {
+            String userHome=System.getProperty("user.home");
+            Path draftDir=Paths.get(userHome,"Documents","Notepad Drafts");
+            Files.createDirectories(draftDir);
+
+            String originalFileName=originalPath!=null?originalPath.getFileName().toString():"Untitled";
+            String draftFileName= originalFileName.replaceAll("\\.txt$","")+".draft.txt";
+            Path draftFile=draftDir.resolve(draftFileName);
+            String content=controller.getCodeArea().getText();
+            Files.writeString(draftFile,content, StandardOpenOption.CREATE,StandardOpenOption.TRUNCATE_EXISTING);
+            
+        } catch (IOException _){}
+    }
+
     public void saveFileAs() {
         FileChooser chooser = new FileChooser();
         chooser.setTitle("Save File As");
@@ -95,9 +115,11 @@ public class OptFile_handler {
     }
 
     public void exitApplication() {
+        draftSave(Path.of("/home/aditya/Pictures"));
         if (hasUnsavedChanges() && confirmAndSaveIfNeeded()) return;
         Platform.exit();
     }
+
 
     private boolean hasUnsavedChanges() {
         return controller.isModified();

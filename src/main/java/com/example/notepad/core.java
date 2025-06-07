@@ -1,25 +1,33 @@
 package com.example.notepad;
 
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
+import javafx.scene.control.RadioMenuItem;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.text.Font;
+import javafx.stage.Stage;
+import org.controlsfx.dialog.FontSelectorDialog;
 import org.fxmisc.flowless.VirtualizedScrollPane;
 import org.fxmisc.richtext.CodeArea;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.*;
+import java.util.logging.FileHandler;
 
 public class core {
 
     public StackPane suggestionBox;
+    public RadioMenuItem osk;
     @FXML
     private BorderPane editorContainer;
     @FXML
-    private suggestion_handler suggestionBoxController; // This binds via fx:id="suggestionBox"
+    private suggestion_handler suggestionBoxController;
     @FXML
     private StackPane editorStack;
 
@@ -44,22 +52,29 @@ public class core {
 
     @FXML
     public void initialize() {
-        // Set up CodeArea with styling and line numbering
         codeArea = new CodeArea();
         codeArea.setFocusTraversable(true);
-        codeArea.setStyle("-fx-font-family: 'Consolas'; -fx-font-size: 14px;");
+        codeArea.setStyle("-fx-font-family: 'Calibri'; -fx-font-size: 14px;");
         codeArea.setParagraphGraphicFactory(createLineNumberFactory());
         codeArea.textProperty().addListener((_, _, _) -> isModified = true);
 
         VirtualizedScrollPane<CodeArea> vsPane = new VirtualizedScrollPane<>(codeArea);
         editorStack.getChildren().addFirst(vsPane);
 
-        // Bind CodeArea to suggestion handler
+
         suggestionBoxController.setCodeArea(codeArea);
 
-        // Initialize handlers
         fileHandler = new OptFile_handler(this);
+
         editHandler = new OptEdit_handler(this);
+
+        Platform.runLater(() -> {
+            Stage stage = (Stage) codeArea.getScene().getWindow();
+            stage.setOnCloseRequest(e -> {
+                e.consume();
+                fileHandler.exitApplication();
+            });
+        });
     }
 
 
@@ -86,7 +101,7 @@ public class core {
                 } else {
                     lineColorMap.remove(lineIndex);
                 }
-                // Refresh the line number styling
+
                 codeArea.setParagraphGraphicFactory(createLineNumberFactory());
             });
 
@@ -95,7 +110,6 @@ public class core {
     }
 
     private String getNextColor(String current) {
-        // Use get(0) instead of getFirst()
         if (current == null || !colorCycle.contains(current)) return colorCycle.getFirst();
         int index = colorCycle.indexOf(current);
         return colorCycle.get((index + 1) % colorCycle.size());
@@ -105,8 +119,8 @@ public class core {
         return switch (lineColorMap.getOrDefault(line, "NONE")) {
             case "YELLOW" -> "-fx-background-color: yellow; -fx-text-fill: black;";
             case "GREEN"  -> "-fx-background-color: lightgreen; -fx-text-fill: black;";
-            case "RED"    -> "-fx-background-color: tomato; -fx-text-fill: white;";
-            default       -> "-fx-background-color: transparent; -fx-text-fill: grey;";
+            case "RED"    -> "-fx-background-color: tomato; -fx-text-fill: black;";
+            default       -> "-fx-background-color: lightgrey; -fx-text-fill: black;";
         };
     }
 
@@ -179,13 +193,31 @@ public class core {
     }
 
     public void FormatMenu_font() {
+        FontSelectorDialog fontSelectorDialog = new FontSelectorDialog(Font.font("Calibre", 5));
+        fontSelectorDialog.setResizable(true);
+        fontSelectorDialog.setHeaderText("Select the Font");
+        fontSelectorDialog.setContentText("Select the Font");
+        fontSelectorDialog.setTitle("Font Chooser Dialog");
+        fontSelectorDialog.showAndWait();
+        Font selectedFont = fontSelectorDialog.getResult();
+        String fontStyle;
+        if (selectedFont != null){
+            fontStyle = String.format("-fx-font-family: '%s'; -fx-font-size: %.1f;", selectedFont.getFamily(), selectedFont.getSize());
+            codeArea.setStyle(fontStyle);
+        }
     }
 
-    public void FormatMenu_wordWrap() {
-    }
 
     public void ViewMenu_on_screen_kb() {
-
+        if (osk.isSelected()) {
+            try {
+                new ProcessBuilder("cmd", "/c", "start", "osk").start();
+            } catch (IOException _) {}
+        } else {
+            try {
+                new ProcessBuilder("cmd", "/c", "start", "osk").start();
+            } catch (IOException _) {}
+        }
     }
 
     public void registerShortcutKeys(Scene scene) {
@@ -219,8 +251,8 @@ public class core {
 
             @Override
             public void onRedo() {
-                if (codeArea.isRedoAvailable()) {
-                    codeArea.redo();
+                if (isModified()) {
+
                 }
             }
         });

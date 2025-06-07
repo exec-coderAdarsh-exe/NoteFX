@@ -35,12 +35,11 @@
             <!--            // Format menu-->
             <Menu text="Format">
                 <MenuItem text="Font" onAction="#FormatMenu_font"/>
-                <RadioMenuItem text="Word Wrap" onAction="#FormatMenu_wordWrap"/>
             </Menu>
 
             <!--            // View menu-->
             <Menu text="View">
-                <RadioMenuItem text="On-Screen keyboard" onAction="#ViewMenu_on_screen_kb"/>
+                <RadioMenuItem text="On-Screen keyboard" fx:id="osk" onAction="#ViewMenu_on_screen_kb"/>
             </Menu>
 
             <!--                        // Help menu-->
@@ -56,7 +55,7 @@
         </MenuBar>
     </top>
 
-        <fx:include fx:id="suggestionBox" source="suggestion_box_ui.fxml"/>
+        <fx:include source="suggestion_box_ui.fxml"/>
     <center>
         <StackPane fx:id="editorStack">
             <!-- VirtualizedScrollPane with CodeArea will be set in controller -->
