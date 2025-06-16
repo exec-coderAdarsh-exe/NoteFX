@@ -2,26 +2,33 @@ package com.example.notepad;
 
 import javafx.application.Platform;
 import javafx.fxml.FXML;
-import javafx.geometry.Pos;
 import javafx.scene.Cursor;
 import javafx.scene.control.ListView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.stage.Popup;
+import javafx.stage.Stage;
 import org.fxmisc.richtext.CodeArea;
 
-import java.awt.event.TextEvent;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class suggestion_handler {
 
     public VBox codeContainer;
-    @FXML private StackPane editorRoot;
     @FXML public ListView<String> suggestionList;
-
+    @FXML private StackPane editorRoot;
     private CodeArea codeArea;
+    private boolean listenersAttached = false;
+
+    public void getHideSuggestionsForCore(){
+            hideSuggestions();
+    }
 
     @FXML
     public void initialize() {
@@ -31,7 +38,6 @@ public class suggestion_handler {
 
         configureSuggestionList();
         editorRoot.setCursor(Cursor.TEXT);
-        suggestionList.setCursor(Cursor.DEFAULT);
 
     }
 
@@ -39,8 +45,6 @@ public class suggestion_handler {
         this.codeArea = area;
         attachListeners();  // CodeArea is assigned
     }
-
-
 
     private void configureSuggestionList() {
         suggestionList.setFixedCellSize(24);
@@ -65,8 +69,6 @@ public class suggestion_handler {
             else if (event.getCode() == KeyCode.ESCAPE) hideSuggestions();
         });
     }
-
-    private boolean listenersAttached = false;
 
     private void attachListeners() {
         if (listenersAttached || codeArea == null) return;
@@ -99,11 +101,20 @@ public class suggestion_handler {
                 }
             }
             else codeArea.requestFocus();
+
+            Platform.runLater(() -> {
+                Stage stage = (Stage) codeArea.getScene().getWindow();
+                stage.setOnCloseRequest(e -> {
+                    e.consume();
+                    hideSuggestions();
+                    OptFile_handler.exitApplication();
+                });
+            });
+
+
         });
 
     }
-
-
 
     private void showSuggestionsIfNeeded() {
         String prefix = getCurrentWordPrefix();
@@ -113,13 +124,13 @@ public class suggestion_handler {
                 suggestionList.getItems().setAll(matches);
                 suggestionList.getSelectionModel().selectFirst();
                 showSuggestions();
-                positionSuggestionBox();
+                positionSuggestionBox(true);
                 return;
             }
         }
         hideSuggestions();
+        positionSuggestionBox(false);
     }
-
 
     private String getCurrentWordPrefix() {
         int caretPos = codeArea.getCaretPosition();
@@ -139,45 +150,47 @@ public class suggestion_handler {
                 .collect(Collectors.toList());
     }
 
-    private void positionSuggestionBox() {
-        suggestionList.setPrefWidth(200);
-        suggestionList.setPrefHeight(120);
-        suggestionList.setMaxWidth(200);
-        suggestionList.setMaxHeight(120);
-
-
-        StackPane.setAlignment(suggestionList, Pos.TOP_LEFT);
-
-
-        if (codeArea == null || suggestionList == null) return;
-
-
-        try {
-
-            var caretBoundsOpt = codeArea.getCaretBounds();
-            if (caretBoundsOpt.isEmpty()) return;
-
-            var caretBounds = caretBoundsOpt.get();
-
-            // Convert local bounds of CodeArea caret to parent (StackPane) coordinates
-            var localToScene = codeArea.localToScene(caretBounds);
-            var sceneToParent = editorRoot.sceneToLocal(localToScene);
-
-            double x = localToScene.getMinX()+100;
-            double y = localToScene.getMaxY()+20;
-
-            suggestionList.setLayoutX(x);
-            suggestionList.setLayoutY(y);
-        } catch (Exception e) {
-            System.err.println("Failed to position suggestion box: " + e.getMessage());
-        }
+    private void showSuggestions(){
+        suggestionList.setVisible(true);
+        suggestionList.setManaged(true);
+//        suggestionList.setOnMouseEntered(e ->{
+//            suggestionList.setCursor(Cursor.DEFAULT);
+//            suggestionList.requestFocus();
+//            editorRoot.setMouseTransparent(false);
+//        });
+//        suggestionList.setOnMouseExited(e ->{
+//            suggestionList.setCursor(Cursor.TEXT);
+//            codeArea.requestFocus();
+//            editorRoot.setMouseTransparent(true);
+//        });
+        suggestionList.setCursor(Cursor.DEFAULT);
     }
 
+    private void positionSuggestionBox(boolean flag) {
+        Popup popup = new Popup();
+        double cellSize = core.fontSize*1.5;
+        suggestionList.setStyle(core.defaultFontSize);
+        suggestionList.setFixedCellSize(cellSize);
+        suggestionList.setPrefHeight(3*cellSize);
 
 
 
+        popup.getContent().addAll(suggestionList);
 
+//        if (codeArea.getSelectedText().isEmpty() && isTypingKey(event.getCode())) {
+        codeArea.getCaretBounds().ifPresent(bounds -> {
+            if (flag) {
+                popup.show(codeArea, bounds.getMaxX(), bounds.getMaxY());
+            } else {
+                popup.hide();
+            }
+        });
+//        }
+    }
 
+    private boolean isTypingKey(KeyCode code){
+        return code.isLetterKey()||code.isDigitKey()||code.isWhitespaceKey()||code.isKeypadKey();
+    }
 
     private void acceptSelected() {
         String selected = suggestionList.getSelectionModel().getSelectedItem();
@@ -195,27 +208,10 @@ public class suggestion_handler {
         codeArea.requestFocus();
     }
 
-    private void showSuggestions() {
-        suggestionList.setVisible(true);
-        suggestionList.setManaged(true);
-        suggestionList.setOnMouseEntered(e ->{
-            suggestionList.setCursor(Cursor.DEFAULT);
-            suggestionList.requestFocus();
-            editorRoot.setMouseTransparent(false);
-        });
-        suggestionList.setOnMouseExited(e ->{
-            suggestionList.setCursor(Cursor.TEXT);
-            codeArea.requestFocus();
-            editorRoot.setMouseTransparent(true);
-        });
-        suggestionList.setCursor(Cursor.DEFAULT);
-    }
-
     private void hideSuggestions() {
-        editorRoot.setCursor(Cursor.TEXT);
-        editorRoot.setMouseTransparent(true);
         suggestionList.setVisible(false);
         suggestionList.setManaged(false);
+        positionSuggestionBox(false);
     }
 
 }

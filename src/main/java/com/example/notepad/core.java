@@ -1,6 +1,5 @@
 package com.example.notepad;
 
-import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -17,36 +16,48 @@ import org.fxmisc.richtext.CodeArea;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
-import java.util.logging.FileHandler;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class core {
 
-    public StackPane suggestionBox;
-    public RadioMenuItem osk;
-    @FXML
-    private BorderPane editorContainer;
-    @FXML
-    private suggestion_handler suggestionBoxController;
-    @FXML
-    private StackPane editorStack;
+    public static String defaultFontSize;
 
-
-
+    public static double fontSize=14;
 
     public static CodeArea codeArea;
-    private File currentFile = null;
-    private boolean isModified = false;
 
     private final Map<Integer, String> lineColorMap = new HashMap<>();
+
     private final Map<String, List<Integer>> colorGroups = new HashMap<>() {{
         put("YELLOW", new ArrayList<>());
         put("GREEN", new ArrayList<>());
         put("RED", new ArrayList<>());
     }};
+
     private final List<String> colorCycle = List.of("YELLOW", "GREEN", "RED", "NONE");
 
+    public StackPane suggestionBox;
+
+    public RadioMenuItem osk;
+
+    @FXML
+    private BorderPane editorContainer;
+
+    @FXML
+    private suggestion_handler suggestionBoxController;
+
+    @FXML
+    private StackPane editorStack;
+
+    private File currentFile = null;
+
+    private boolean isModified = false;
+
     private OptFile_handler fileHandler;
+
     private OptEdit_handler editHandler;
 
 
@@ -56,7 +67,19 @@ public class core {
         codeArea.setFocusTraversable(true);
         codeArea.setStyle("-fx-font-family: 'Calibri'; -fx-font-size: 14px;");
         codeArea.setParagraphGraphicFactory(createLineNumberFactory());
-        codeArea.textProperty().addListener((_, _, _) -> isModified = true);
+
+        codeArea.textProperty().addListener((_, _, newText) -> {
+            isModified = true;
+
+            Stage stage = (Stage) getEditorContainer().getScene().getWindow();
+            if (newText.isEmpty()) {
+                stage.setTitle("Notepad");
+                setModified(false);
+            } else {
+                stage.setTitle("Unsaved Changes");
+            }
+        });
+
 
         VirtualizedScrollPane<CodeArea> vsPane = new VirtualizedScrollPane<>(codeArea);
         editorStack.getChildren().addFirst(vsPane);
@@ -68,13 +91,6 @@ public class core {
 
         editHandler = new OptEdit_handler(this);
 
-        Platform.runLater(() -> {
-            Stage stage = (Stage) codeArea.getScene().getWindow();
-            stage.setOnCloseRequest(e -> {
-                e.consume();
-                fileHandler.exitApplication();
-            });
-        });
     }
 
 
@@ -125,14 +141,21 @@ public class core {
     }
 
     public void FileMenu_New() { fileHandler.newFile(); }
+
     public void FileMenu_Open() { fileHandler.openFile(); }
-    public void FileMenu_Save() { fileHandler.saveFile(); }
-    public void FileMenu_SaveAS() { fileHandler.saveFileAs(); }
+
+    public void FileMenu_Save() { OptFile_handler.saveFile(); }
+
+    public void FileMenu_SaveAS() { OptFile_handler.saveFileAs(); }
+
     public void FileMenu_Print() { fileHandler.printFile(); }
-    public void FileMenu_Exit() { fileHandler.exitApplication(); }
+
+    public void FileMenu_Exit() { OptFile_handler.exitApplication(); }
 
     public void highlightsMenu_yellow() { showHighlightDialog("YELLOW"); }
+
     public void highlightsMenu_green()  { showHighlightDialog("GREEN"); }
+
     public void highlightsMenu_red()    { showHighlightDialog("RED"); }
 
     private void showHighlightDialog(String color) {
@@ -155,10 +178,15 @@ public class core {
 
     // Accessors for OptFile_handler
     public CodeArea getCodeArea() { return codeArea; }
+
     public File getCurrentFile() { return currentFile; }
+
     public void setCurrentFile(File file) { this.currentFile = file; }
+
     public boolean isModified() { return isModified; }
+
     public void setModified(boolean value) { this.isModified = value; }
+
     public BorderPane getEditorContainer() { return editorContainer; }
 
     public void refreshLineNumbers() {
@@ -193,7 +221,9 @@ public class core {
     }
 
     public void FormatMenu_font() {
-        FontSelectorDialog fontSelectorDialog = new FontSelectorDialog(Font.font("Calibre", 5));
+        Font defaultFont=new Font("Calibri",14);
+        defaultFontSize="-fx-font-family: 'Calibri'; -fx-font-size: 14px;";
+        FontSelectorDialog fontSelectorDialog = new FontSelectorDialog(defaultFont);
         fontSelectorDialog.setResizable(true);
         fontSelectorDialog.setHeaderText("Select the Font");
         fontSelectorDialog.setContentText("Select the Font");
@@ -202,7 +232,9 @@ public class core {
         Font selectedFont = fontSelectorDialog.getResult();
         String fontStyle;
         if (selectedFont != null){
-            fontStyle = String.format("-fx-font-family: '%s'; -fx-font-size: %.1f;", selectedFont.getFamily(), selectedFont.getSize());
+            fontStyle = "-fx-font-family: '"+selectedFont.getFamily()+"'; -fx-font-size: "+selectedFont.getSize()+"px;";
+            defaultFontSize=fontStyle;
+            fontSize=selectedFont.getSize();
             codeArea.setStyle(fontStyle);
         }
     }
@@ -229,7 +261,7 @@ public class core {
 
             @Override
             public void onSave() {
-                fileHandler.saveFile();
+                OptFile_handler.saveFile();
             }
 
             @Override
@@ -251,14 +283,12 @@ public class core {
 
             @Override
             public void onRedo() {
-                if (isModified()) {
-
-                }
             }
         });
 
         shortcutHandler.registerShortcuts(scene);
     }
+
     private void showFindDialog() {
         // Your implementation for the Find dialog
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
