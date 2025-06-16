@@ -3,12 +3,13 @@ package com.example.notepad;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Label;
-import javafx.scene.control.RadioMenuItem;
+import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
+import javafx.stage.Popup;
 import javafx.stage.Stage;
 import org.controlsfx.dialog.FontSelectorDialog;
 import org.fxmisc.flowless.VirtualizedScrollPane;
@@ -24,23 +25,16 @@ import java.util.Map;
 public class core {
 
     public static String defaultFontSize;
-
     public static double fontSize=14;
-
     public static CodeArea codeArea;
-
     private final Map<Integer, String> lineColorMap = new HashMap<>();
-
     private final Map<String, List<Integer>> colorGroups = new HashMap<>() {{
         put("YELLOW", new ArrayList<>());
         put("GREEN", new ArrayList<>());
         put("RED", new ArrayList<>());
     }};
-
     private final List<String> colorCycle = List.of("YELLOW", "GREEN", "RED", "NONE");
-
     public StackPane suggestionBox;
-
     public RadioMenuItem osk;
 
     @FXML
@@ -53,24 +47,25 @@ public class core {
     private StackPane editorStack;
 
     private File currentFile = null;
-
     private boolean isModified = false;
-
     private OptFile_handler fileHandler;
-
     private OptEdit_handler editHandler;
-
+    private int lastMatchIndex = -1;
+    private int lastFindIndex = -1;  // Class-level variable to keep track
 
     @FXML
     public void initialize() {
         codeArea = new CodeArea();
         codeArea.setFocusTraversable(true);
-        codeArea.setStyle("-fx-font-family: 'Calibri'; -fx-font-size: 14px;");
+        codeArea.setStyle("-fx-font-family: 'Consolas'; -fx-font-size: 14px;");
         codeArea.setParagraphGraphicFactory(createLineNumberFactory());
-
+        VirtualizedScrollPane<CodeArea> vsPane = new VirtualizedScrollPane<>(codeArea);
+        editorStack.getChildren().addFirst(vsPane);
+        suggestionBoxController.setCodeArea(codeArea);
+        fileHandler = new OptFile_handler(this);
+        editHandler = new OptEdit_handler(this);
         codeArea.textProperty().addListener((_, _, newText) -> {
             isModified = true;
-
             Stage stage = (Stage) getEditorContainer().getScene().getWindow();
             if (newText.isEmpty()) {
                 stage.setTitle("Notepad");
@@ -79,26 +74,11 @@ public class core {
                 stage.setTitle("Unsaved Changes");
             }
         });
-
-
-        VirtualizedScrollPane<CodeArea> vsPane = new VirtualizedScrollPane<>(codeArea);
-        editorStack.getChildren().addFirst(vsPane);
-
-
-        suggestionBoxController.setCodeArea(codeArea);
-
-        fileHandler = new OptFile_handler(this);
-
-        editHandler = new OptEdit_handler(this);
-
     }
-
-
-
 
     public java.util.function.IntFunction<Node> createLineNumberFactory() {
         return line -> {
-            int lineIndex = line + 1;
+            int lineIndex = line+1;
             Label label = new Label(String.valueOf(lineIndex));
             label.setMinWidth(40);
             label.setPadding(new javafx.geometry.Insets(2, 8, 2, 8));
@@ -107,7 +87,6 @@ public class core {
             label.setOnMouseClicked(_ -> {
                 String current = lineColorMap.get(lineIndex);
                 String next = getNextColor(current);
-
                 if (current != null) {
                     colorGroups.get(current).remove((Integer) lineIndex);
                 }
@@ -118,9 +97,8 @@ public class core {
                     lineColorMap.remove(lineIndex);
                 }
 
-                codeArea.setParagraphGraphicFactory(createLineNumberFactory());
+                refreshLineNumbers();
             });
-
             return label;
         };
     }
@@ -189,40 +167,29 @@ public class core {
 
     public BorderPane getEditorContainer() { return editorContainer; }
 
-    public void refreshLineNumbers() {
-        codeArea.setParagraphGraphicFactory(createLineNumberFactory());
-    }
+    public void refreshLineNumbers() { codeArea.setParagraphGraphicFactory(createLineNumberFactory());}
 
-    public void EditMenu_date_time() { editHandler.EditMenu_date_time();
-    }
+    public void EditMenu_date_time() { editHandler.EditMenu_date_time();}
 
-    public void EditMenu_selectAll() { editHandler.EditMenu_selectAll();
-    }
+    public void EditMenu_selectAll() { editHandler.EditMenu_selectAll();}
 
-    public void EditMenu_goTo() { editHandler.EditMenu_goTo();
-    }
+    public void EditMenu_goTo() { editHandler.EditMenu_goTo();}
 
-    public void EditMenu_replace() { editHandler.EditMenu_replace();
-    }
+    public void EditMenu_replace() { editHandler.EditMenu_replace();}
 
-    public void EditMenu_copy_paste() { editHandler.EditMenu_copy_paste();
-    }
+    public void EditMenu_copy_paste() { editHandler.EditMenu_copy_paste();}
 
-    public void EditMenu_delete() { editHandler.EditMenu_delete();
-    }
+    public void EditMenu_delete() { editHandler.EditMenu_delete();}
 
-    public void EditMenu_cut() { editHandler.EditMenu_cut();
-    }
+    public void EditMenu_cut() { editHandler.EditMenu_cut();}
 
-    public void EditMenu_copy() { editHandler.EditMenu_copy();
-    }
+    public void EditMenu_copy() { editHandler.EditMenu_copy();}
 
-    public void EditMenu_paste() { editHandler.EditMenu_paste();
-    }
+    public void EditMenu_paste() { editHandler.EditMenu_paste();}
 
     public void FormatMenu_font() {
-        Font defaultFont=new Font("Calibri",14);
-        defaultFontSize="-fx-font-family: 'Calibri'; -fx-font-size: 14px;";
+        Font defaultFont=new Font("Consolas",14);
+        defaultFontSize="-fx-font-family: 'Consolas'; -fx-font-size: 14px;";
         FontSelectorDialog fontSelectorDialog = new FontSelectorDialog(defaultFont);
         fontSelectorDialog.setResizable(true);
         fontSelectorDialog.setHeaderText("Select the Font");
@@ -239,17 +206,10 @@ public class core {
         }
     }
 
-
     public void ViewMenu_on_screen_kb() {
-        if (osk.isSelected()) {
-            try {
-                new ProcessBuilder("cmd", "/c", "start", "osk").start();
-            } catch (IOException _) {}
-        } else {
-            try {
-                new ProcessBuilder("cmd", "/c", "start", "osk").start();
-            } catch (IOException _) {}
-        }
+        try {
+            new ProcessBuilder("cmd", "/c", "start", "osk").start();
+        } catch (IOException _) {}
     }
 
     public void registerShortcutKeys(Scene scene) {
@@ -280,22 +240,91 @@ public class core {
                     codeArea.undo();
                 }
             }
-
             @Override
             public void onRedo() {
+
             }
         });
-
         shortcutHandler.registerShortcuts(scene);
     }
 
     private void showFindDialog() {
-        // Your implementation for the Find dialog
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Find");
-        alert.setHeaderText(null);
-        alert.setContentText("Find dialog not implemented yet.");
-        alert.showAndWait();
+        Popup popup = new Popup();
+        popup.setAutoHide(true);
+        popup.setAutoFix(true);
+
+        VBox layout = new VBox(8);
+        layout.setStyle("-fx-background-color: white; -fx-border-color: black; -fx-padding: 10;");
+        layout.setPrefWidth(320);
+
+        TextField findField = new TextField();
+        findField.setPromptText("Find");
+        TextField replaceField = new TextField();
+        replaceField.setPromptText("Replace");
+
+        Button interchangeButton = new Button("⇄");
+        interchangeButton.setOnAction(e -> {
+            String temp = findField.getText();
+            findField.setText(replaceField.getText());
+            replaceField.setText(temp);
+        });
+
+        HBox findReplaceRow = new HBox(5, findField, interchangeButton, replaceField);
+        findReplaceRow.setPrefWidth(300);
+        findField.setPrefWidth(110);
+        replaceField.setPrefWidth(110);
+        interchangeButton.setPrefWidth(30);
+        Button findButton = new Button("Find Next");
+        Button replaceButton = new Button("Replace");
+        Button replaceAllButton = new Button("Replace All");
+        Button closeButton = new Button("Close");
+        HBox buttons = new HBox(8, findButton, replaceButton, replaceAllButton);
+        layout.getChildren().addAll(new Label("Find and Replace:"), findReplaceRow, buttons, closeButton);
+        popup.getContent().add(layout);
+        findField.setOnAction(e -> findNext(findField.getText()));
+        findButton.setOnAction(e -> findNext(findField.getText()));
+        replaceButton.setOnAction(e -> replaceSelected(replaceField.getText()));
+        replaceAllButton.setOnAction(e -> replaceAll(findField.getText(), replaceField.getText()));
+        closeButton.setOnAction(e -> popup.hide());
+        Stage stage = (Stage) codeArea.getScene().getWindow();
+        popup.show(stage);
     }
 
+    private void findNext(String query) {
+        if (query == null || query.isEmpty()) return;
+
+        String text = codeArea.getText();
+        int startIndex = codeArea.getCaretPosition();
+        int index = text.indexOf(query, startIndex);
+        if (index == -1 && startIndex > 0) {
+            index = text.indexOf(query);
+        }
+        if (index == -1) {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Not Found");
+            alert.setHeaderText(null);
+            alert.setContentText("No occurrences of \"" + query + "\" found.");
+            alert.show();
+            return;
+        }
+        codeArea.selectRange(index, index + query.length());
+        codeArea.requestFocus();
+        lastFindIndex = index;
+    }
+
+    private void replaceSelected(String replacement) {
+        if (codeArea.getSelectedText().isEmpty()) return;
+
+        codeArea.replaceSelection(replacement);
+        lastMatchIndex = -1;
+    }
+
+    private void replaceAll(String searchText, String replacement) {
+        if (searchText == null || searchText.isEmpty()) return;
+
+        String content = codeArea.getText();
+        String updated = content.replace(searchText, replacement);
+        codeArea.replaceText(updated);
+        lastMatchIndex = -1;
+    }
 }

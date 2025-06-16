@@ -5,7 +5,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.StackPane?>
-<BorderPane fx:id="editorContainer" xmlns:fx="http://javafx.com/fxml" fx:controller="com.example.notepad.core">
+<BorderPane xmlns:fx="http://javafx.com/fxml" fx:id="editorContainer" fx:controller="com.example.notepad.core">
     <top>
         <MenuBar>
 
@@ -55,7 +55,6 @@
         </MenuBar>
     </top>
 
-        <fx:include source="suggestion_box_ui.fxml"/>
     <center>
         <StackPane fx:id="editorStack">
             <!-- VirtualizedScrollPane with CodeArea will be set in controller -->

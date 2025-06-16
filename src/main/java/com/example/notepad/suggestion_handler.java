@@ -3,6 +3,7 @@ package com.example.notepad;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.Cursor;
+import javafx.scene.Scene;
 import javafx.scene.control.ListView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -20,15 +21,12 @@ import java.util.stream.Collectors;
 
 public class suggestion_handler {
 
+    private final Popup suggestionPopup = new Popup();
     public VBox codeContainer;
     @FXML public ListView<String> suggestionList;
     @FXML private StackPane editorRoot;
     private CodeArea codeArea;
     private boolean listenersAttached = false;
-
-    public void getHideSuggestionsForCore(){
-            hideSuggestions();
-    }
 
     @FXML
     public void initialize() {
@@ -38,6 +36,10 @@ public class suggestion_handler {
 
         configureSuggestionList();
         editorRoot.setCursor(Cursor.TEXT);
+
+        if (!suggestionPopup.getContent().contains(suggestionList)) {
+            suggestionPopup.getContent().add(suggestionList);
+        }
 
     }
 
@@ -71,13 +73,28 @@ public class suggestion_handler {
     }
 
     private void attachListeners() {
+
+        Scene scene = codeArea.getScene();
+        if (scene != null) {
+            scene.addEventFilter(KeyEvent.KEY_PRESSED, event -> {
+                if (event.getCode() == KeyCode.ESCAPE && suggestionList.isVisible()) {
+                    hideSuggestions();
+                    codeArea.requestFocus();
+                    suggestionList.getSelectionModel().clearSelection();
+                    event.consume();
+                }
+            });
+        } else {
+            // Run later if scene isn't ready yet
+            Platform.runLater(this::attachListeners);
+        }
+
+
         if (listenersAttached || codeArea == null) return;
         listenersAttached = true;
 
         codeArea.textProperty().addListener((_, _, _) -> Platform.runLater(this::showSuggestionsIfNeeded));
         codeArea.caretPositionProperty().addListener((_, _, _) -> Platform.runLater(this::showSuggestionsIfNeeded));
-
-
 
         codeArea.addEventFilter(KeyEvent.KEY_PRESSED, event -> {
             if (suggestionList.isVisible()) {
@@ -86,18 +103,15 @@ public class suggestion_handler {
                     suggestionList.requestFocus();
                     suggestionList.getSelectionModel().selectFirst();
                     event.consume();
-                } else if (event.getCode() == KeyCode.DOWN) {
+                }
+                else if (event.getCode() == KeyCode.DOWN) {
                     suggestionList.requestFocus();
                     suggestionList.getSelectionModel().select(1);
                     event.consume();
-                } else {
-                    if (event.getCode() == KeyCode.ENTER) {
-                        acceptSelected();
-                        event.consume();
-                    } else if (event.getCode() == KeyCode.ESCAPE) {
-                        hideSuggestions();
-                        event.consume();
-                    }
+                }
+                else if (event.getCode() == KeyCode.ENTER) {
+                    acceptSelected();
+                    event.consume();
                 }
             }
             else codeArea.requestFocus();
@@ -118,9 +132,30 @@ public class suggestion_handler {
 
     private void showSuggestionsIfNeeded() {
         String prefix = getCurrentWordPrefix();
-        if (!prefix.isEmpty()) {
+        if (!codeArea.getSelectedText().isEmpty()) {
+            hideSuggestions();
+            return;
+        }
+        if (prefix.isEmpty()) {
+            hideSuggestions();
+            return;
+        }
+
+        int caretPos = codeArea.getCaretPosition();
+        String fullText = codeArea.getText();
+
+        // Check character before the word
+        boolean leftWhitespace = caretPos - prefix.length() - 1 < 0 ||
+                Character.isWhitespace(fullText.charAt(caretPos - prefix.length() - 1));
+
+        // Check character after the word
+        boolean rightWhitespace = caretPos >= fullText.length() ||
+                Character.isWhitespace(fullText.charAt(caretPos));
+
+        if (leftWhitespace && rightWhitespace) {
             List<String> matches = findMatches(prefix);
             if (!matches.isEmpty()) {
+                suggestionList.getSelectionModel().clearSelection();
                 suggestionList.getItems().setAll(matches);
                 suggestionList.getSelectionModel().selectFirst();
                 showSuggestions();
@@ -128,9 +163,12 @@ public class suggestion_handler {
                 return;
             }
         }
+
         hideSuggestions();
+        suggestionList.getSelectionModel().clearSelection();
         positionSuggestionBox(false);
     }
+
 
     private String getCurrentWordPrefix() {
         int caretPos = codeArea.getCaretPosition();
@@ -151,46 +189,27 @@ public class suggestion_handler {
     }
 
     private void showSuggestions(){
+        editorRoot.setMouseTransparent(false); // Start catching events
         suggestionList.setVisible(true);
         suggestionList.setManaged(true);
-//        suggestionList.setOnMouseEntered(e ->{
-//            suggestionList.setCursor(Cursor.DEFAULT);
-//            suggestionList.requestFocus();
-//            editorRoot.setMouseTransparent(false);
-//        });
-//        suggestionList.setOnMouseExited(e ->{
-//            suggestionList.setCursor(Cursor.TEXT);
-//            codeArea.requestFocus();
-//            editorRoot.setMouseTransparent(true);
-//        });
-        suggestionList.setCursor(Cursor.DEFAULT);
     }
 
     private void positionSuggestionBox(boolean flag) {
-        Popup popup = new Popup();
-        double cellSize = core.fontSize*1.5;
+        double cellSize = core.fontSize * 1.5;
         suggestionList.setStyle(core.defaultFontSize);
         suggestionList.setFixedCellSize(cellSize);
-        suggestionList.setPrefHeight(3*cellSize);
+        suggestionList.setPrefHeight(3 * cellSize);
 
-
-
-        popup.getContent().addAll(suggestionList);
-
-//        if (codeArea.getSelectedText().isEmpty() && isTypingKey(event.getCode())) {
-        codeArea.getCaretBounds().ifPresent(bounds -> {
-            if (flag) {
-                popup.show(codeArea, bounds.getMaxX(), bounds.getMaxY());
-            } else {
-                popup.hide();
-            }
-        });
-//        }
+        if (flag) {
+            codeArea.getCaretBounds().ifPresent(bounds -> {
+                suggestionPopup.show(codeArea, bounds.getMaxX(), bounds.getMaxY());
+            });
+        } else {
+            suggestionPopup.hide();
+            codeArea.requestFocus();
+        }
     }
 
-    private boolean isTypingKey(KeyCode code){
-        return code.isLetterKey()||code.isDigitKey()||code.isWhitespaceKey()||code.isKeypadKey();
-    }
 
     private void acceptSelected() {
         String selected = suggestionList.getSelectionModel().getSelectedItem();
@@ -212,6 +231,8 @@ public class suggestion_handler {
         suggestionList.setVisible(false);
         suggestionList.setManaged(false);
         positionSuggestionBox(false);
+        editorRoot.setMouseTransparent(true); // Allow events to pass through
+        codeArea.requestFocus();
     }
 
 }

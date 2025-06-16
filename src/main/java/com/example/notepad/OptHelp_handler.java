@@ -2,9 +2,13 @@ package com.example.notepad;
 
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
+import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
-import javafx.scene.layout.*;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import javafx.stage.Modality;
@@ -19,48 +23,28 @@ public class OptHelp_handler {
     private final TextField searchField;
     private final TabPane tabPane;
     private final Map<String, String> helpContent;
-    private boolean darkMode = false;
 
     public OptHelp_handler() {
         helpStage = new Stage();
         helpStage.setTitle("Help - Notepad");
         helpStage.initModality(Modality.APPLICATION_MODAL);
-        helpStage.setMinWidth(650);
+        helpStage.setMinWidth(750);
         helpStage.setMinHeight(400);
-
-        // Initialize help content
         helpContent = loadHelpContent();
-
-        // Search input
         searchField = new TextField();
         searchField.setPromptText("Search help topics...");
         searchField.setMinWidth(400);
-
-        Button darkModeToggle = new Button("Toggle Dark Mode");
-        darkModeToggle.setOnAction(_ -> toggleDarkMode());
-
-        HBox topBar = new HBox(10, searchField, darkModeToggle);
+        HBox topBar = new HBox(10, searchField);
         topBar.setPadding(new Insets(10));
-
-        // Tabs container
         tabPane = new TabPane();
         tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
-
-        // Layout
         VBox root = new VBox(5, topBar, tabPane);
         root.setPadding(new Insets(10));
-
-        // Set scene
         Scene scene = new Scene(root);
         helpStage.setScene(scene);
-
-        // Populate all tabs initially (no highlight)
         loadAllTabs();
-
-        // Add search listener
         searchField.textProperty().addListener((_, _, newVal) -> handleSmartSearch(newVal));
 
-        // Allow pressing ESC to close help window
         scene.setOnKeyPressed(e -> {
             if (e.getCode() == KeyCode.ESCAPE) helpStage.close();
         });
@@ -70,23 +54,34 @@ public class OptHelp_handler {
         helpStage.showAndWait();
     }
 
-    private void toggleDarkMode() {
-        darkMode = !darkMode;
-        // No CSS, so this is a stub.
-        // You can expand to switch styles inline or via scene.getStylesheets()
-        Alert alert = new Alert(Alert.AlertType.INFORMATION, "Dark mode toggled (stub). Implement styling here.");
-        alert.initOwner(helpStage);
-        alert.showAndWait();
-    }
 
     private Map<String, String> loadHelpContent() {
         Map<String, String> content = new LinkedHashMap<>();
 
         content.put("About Notepad",
                 """
-                        Welcome to the Notepad application.
-                        
-                        This help section contains useful information about the features and how to use them."""
+                        NoteFX
+                        Advanced Notepad built using JavaFx
+                       \s
+                        This Notepad Application is a sophisticated text editor built using JavaFX and RichTextFX.
+                        It combines essential editing functionalities with advanced features designed to enhance productivity and ease of use. This project showcases a robust, user-friendly interface tailored for efficient text manipulation.
+                       \s
+                        Features :\s
+                        Rich Text Editing
+                        Customizable fonts and font sizes to suit user preferences.
+                        Text Suggestions (current file based)
+                        File Operations
+                        Line Numbering & Highlighting - Click numbers for highlighting it so that you make keep it for some reminder.
+                        Find and Replace
+                        Draft System - Auto-save drafts every 3 minutes
+                       \s
+                        Installation Ensure you have Java 11 or higher installed
+                       \s
+                        The application auto-saves drafts periodically to prevent data loss.
+                       \s
+                       \s
+                        About the Developer : Aditya — A committed student and aspiring software developer focused on creating practical and efficient applications.This Notepad project represents a step toward mastering JavaFX and advanced UI development.
+                       \s"""
         );
 
         content.put("Using the Editor",
@@ -95,8 +90,7 @@ public class OptHelp_handler {
                         - Cut, Copy, Paste
                         - Select All
                         - Undo/Redo
-                        - Find and Replace (supports multi-line replacements)
-                        - Formatting like bold, italic, and underline (planned)"""
+                        - Find and Replace (supports multi-line replacements)"""
         );
 
         content.put("Keyboard Shortcuts",
@@ -116,22 +110,7 @@ public class OptHelp_handler {
                         If you encounter issues:
                         - Ensure you have proper write permissions to the save location.
                         - If the app crashes, restart it and try again.
-                        - Report bugs via the provided feedback form.
-                        - For advanced help, visit our website."""
-        );
-
-        content.put("Dark Mode",
-                "Toggle dark mode to reduce eye strain during night time usage.\n" +
-                        "Currently, dark mode toggle is under development."
-        );
-
-        content.put("Advanced Features",
-                """
-                        Future updates will include:
-                        - Syntax highlighting for code
-                        - Auto-completion
-                        - Plugin support
-                        - Cloud sync"""
+                        - Report bugs via the provided feedback form."""
         );
 
         return content;
@@ -251,10 +230,8 @@ public class OptHelp_handler {
             Text highlighted = new Text(content.substring(nextMatchStart, nextMatchStart + matchLength));
             highlighted.setStyle("-fx-fill: red; -fx-font-weight: bold;");
             result.add(highlighted);
-
             index = nextMatchStart + matchLength;
         }
-
         return result;
     }
 }
