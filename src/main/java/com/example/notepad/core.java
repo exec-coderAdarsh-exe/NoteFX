@@ -175,8 +175,6 @@ public class core {
 
     public void EditMenu_goTo() { editHandler.EditMenu_goTo();}
 
-    public void EditMenu_replace() { editHandler.EditMenu_replace();}
-
     public void EditMenu_copy_paste() { editHandler.EditMenu_copy_paste();}
 
     public void EditMenu_delete() { editHandler.EditMenu_delete();}

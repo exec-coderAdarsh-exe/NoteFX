@@ -54,7 +54,6 @@ public class OptHelp_handler {
         helpStage.showAndWait();
     }
 
-
     private Map<String, String> loadHelpContent() {
         Map<String, String> content = new LinkedHashMap<>();
 
@@ -83,7 +82,6 @@ public class OptHelp_handler {
                         About the Developer : Aditya — A committed student and aspiring software developer focused on creating practical and efficient applications.This Notepad project represents a step toward mastering JavaFX and advanced UI development.
                        \s"""
         );
-
         content.put("Using the Editor",
                 """
                         The editor supports basic text editing features:
@@ -92,7 +90,6 @@ public class OptHelp_handler {
                         - Undo/Redo
                         - Find and Replace (supports multi-line replacements)"""
         );
-
         content.put("Keyboard Shortcuts",
                 """
                         Common shortcuts include:
@@ -104,7 +101,6 @@ public class OptHelp_handler {
                         Ctrl+Y: Redo
                         """
         );
-
         content.put("Troubleshooting",
                 """
                         If you encounter issues:
@@ -115,33 +111,24 @@ public class OptHelp_handler {
 
         return content;
     }
-
     private void loadAllTabs() {
         tabPane.getTabs().clear();
         helpContent.forEach((title, content) -> {
-            boolean highlight = false; // no highlight on full load
+            boolean highlight = false;
             tabPane.getTabs().add(createTab(title, content, highlight));
         });
     }
-
     private void handleSmartSearch(String query) {
         tabPane.getTabs().clear();
-
         if (query == null || query.isBlank()) {
-            // Show all tabs no highlight
             loadAllTabs();
             return;
         }
-
         String[] tokens = query.toLowerCase().split("\\s+");
-
-        // Exclude About section from search matching
         List<Map.Entry<String, String>> helpOnly = helpContent.entrySet()
                 .stream()
                 .filter(entry -> !entry.getKey().equalsIgnoreCase("About Notepad"))
                 .toList();
-
-        // Find matched entries where all tokens appear in title or content
         List<Map.Entry<String, String>> matched = helpOnly.stream()
                 .filter(entry -> {
                     String title = entry.getKey().toLowerCase();
@@ -170,10 +157,8 @@ public class OptHelp_handler {
 
     private Tab createTab(String title, String content, boolean highlight) {
         Tab tab = new Tab(title);
-
         ScrollPane scrollPane = new ScrollPane();
         scrollPane.setFitToWidth(true);
-
         TextFlow textFlow = new TextFlow();
         textFlow.setLineSpacing(5);
         textFlow.setPrefWidth(600);
@@ -191,7 +176,6 @@ public class OptHelp_handler {
                 textFlow.getChildren().addAll(generateHighlightedText(content, tokens));
             }
         }
-
         scrollPane.setContent(textFlow);
         tab.setContent(scrollPane);
         return tab;
@@ -205,7 +189,6 @@ public class OptHelp_handler {
         while (index < content.length()) {
             int nextMatchStart = -1;
             int matchLength = 0;
-
             for (String token : tokens) {
                 if (token.isBlank()) continue;
                 int match = contentLower.indexOf(token, index);
@@ -214,19 +197,13 @@ public class OptHelp_handler {
                     matchLength = token.length();
                 }
             }
-
             if (nextMatchStart == -1) {
-                // No more matches, add rest as normal text
                 result.add(new Text(content.substring(index)));
                 break;
             }
-
-            // Add text before match
             if (nextMatchStart > index) {
                 result.add(new Text(content.substring(index, nextMatchStart)));
             }
-
-            // Add matched text with highlight
             Text highlighted = new Text(content.substring(nextMatchStart, nextMatchStart + matchLength));
             highlighted.setStyle("-fx-fill: red; -fx-font-weight: bold;");
             result.add(highlighted);

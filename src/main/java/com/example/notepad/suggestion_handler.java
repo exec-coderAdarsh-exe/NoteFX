@@ -45,7 +45,7 @@ public class suggestion_handler {
 
     public void setCodeArea(CodeArea area) {
         this.codeArea = area;
-        attachListeners();  // CodeArea is assigned
+        attachListeners();
     }
 
     private void configureSuggestionList() {
@@ -85,7 +85,6 @@ public class suggestion_handler {
                 }
             });
         } else {
-            // Run later if scene isn't ready yet
             Platform.runLater(this::attachListeners);
         }
 
@@ -124,10 +123,7 @@ public class suggestion_handler {
                     OptFile_handler.exitApplication();
                 });
             });
-
-
         });
-
     }
 
     private void showSuggestionsIfNeeded() {
@@ -144,11 +140,9 @@ public class suggestion_handler {
         int caretPos = codeArea.getCaretPosition();
         String fullText = codeArea.getText();
 
-        // Check character before the word
         boolean leftWhitespace = caretPos - prefix.length() - 1 < 0 ||
                 Character.isWhitespace(fullText.charAt(caretPos - prefix.length() - 1));
 
-        // Check character after the word
         boolean rightWhitespace = caretPos >= fullText.length() ||
                 Character.isWhitespace(fullText.charAt(caretPos));
 
@@ -163,7 +157,6 @@ public class suggestion_handler {
                 return;
             }
         }
-
         hideSuggestions();
         suggestionList.getSelectionModel().clearSelection();
         positionSuggestionBox(false);
@@ -189,7 +182,7 @@ public class suggestion_handler {
     }
 
     private void showSuggestions(){
-        editorRoot.setMouseTransparent(false); // Start catching events
+        editorRoot.setMouseTransparent(false);
         suggestionList.setVisible(true);
         suggestionList.setManaged(true);
     }
@@ -231,7 +224,7 @@ public class suggestion_handler {
         suggestionList.setVisible(false);
         suggestionList.setManaged(false);
         positionSuggestionBox(false);
-        editorRoot.setMouseTransparent(true); // Allow events to pass through
+        editorRoot.setMouseTransparent(true);
         codeArea.requestFocus();
     }
 

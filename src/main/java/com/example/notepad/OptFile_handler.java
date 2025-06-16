@@ -18,7 +18,6 @@ public class OptFile_handler {
 
     private static core controller;
 
-
     public OptFile_handler(core controller) {
         OptFile_handler.controller = controller;
     }

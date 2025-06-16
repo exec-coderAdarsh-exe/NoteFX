@@ -24,7 +24,6 @@
                 <MenuItem text="Date &amp; Time" onAction="#EditMenu_date_time"/>
                 <MenuItem text="Select all" onAction="#EditMenu_selectAll"/>
                 <MenuItem text="Go to" onAction="#EditMenu_goTo"/>
-                <MenuItem text="Replace" onAction="#EditMenu_replace"/>
                 <MenuItem text="Duplicate" onAction="#EditMenu_copy_paste"/>
                 <MenuItem text="Delete" onAction="#EditMenu_delete"/>
                 <MenuItem text="Cut" onAction="#EditMenu_cut"/>
@@ -57,30 +56,8 @@
 
     <center>
         <StackPane fx:id="editorStack">
-            <!-- VirtualizedScrollPane with CodeArea will be set in controller -->
-            <!-- Suggestion box overlay -->
             <fx:include fx:id="suggestionBox" source="suggestion_box_ui.fxml"/>
         </StackPane>
     </center>
 
-
-
 </BorderPane>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

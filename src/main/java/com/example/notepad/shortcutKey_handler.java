@@ -17,26 +17,12 @@ import javafx.scene.input.KeyEvent;
  */
 public class shortcutKey_handler {
 
-    public interface ShortcutListener {
-        void onNewFile();
-        void onSave();
-        void onOpen();
-        void onFind();
-        void onUndo();
-        void onRedo();
-    }
-
     private final ShortcutListener listener;
 
     public shortcutKey_handler(ShortcutListener listener) {
         this.listener = listener;
     }
 
-    /**
-     * Register keyboard shortcuts on the given Scene.
-     *
-     * @param scene The JavaFX scene to listen for key events.
-     */
     public void registerShortcuts(Scene scene) {
         scene.addEventFilter(KeyEvent.KEY_PRESSED, event -> {
             if (event.isControlDown()) {
@@ -68,10 +54,18 @@ public class shortcutKey_handler {
                         event.consume();
                     }
                     default -> {
-                        // Do nothing for other keys
                     }
                 }
             }
         });
+    }
+
+    public interface ShortcutListener {
+        void onNewFile();
+        void onSave();
+        void onOpen();
+        void onFind();
+        void onUndo();
+        void onRedo();
     }
 }
