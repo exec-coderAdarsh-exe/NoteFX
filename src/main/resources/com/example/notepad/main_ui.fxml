@@ -3,52 +3,68 @@
 <!--    Handles the main stage ui   -->
 
 <?import javafx.scene.control.*?>
-<?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.layout.StackPane?>
-<BorderPane xmlns:fx="http://javafx.com/fxml" fx:id="editorContainer" fx:controller="com.example.notepad.core">
+<?import javafx.scene.layout.*?>
+<BorderPane xmlns:fx="http://javafx.com/fxml" fx:id="editorContainer" fx:controller="com.example.notepad.core" stylesheets="@notefx-menu-bar.css">
     <top>
-        <MenuBar>
+        <MenuBar styleClass="note-menu-bar">
 
-            <!--            // File menu-->
             <Menu text="File">
-                <MenuItem text="New" onAction="#FileMenu_New"/>
-                <MenuItem text="Open" onAction="#FileMenu_Open"/>
-                <MenuItem text="Save" onAction="#FileMenu_Save"/>
-                <MenuItem text="Save as" onAction="#FileMenu_SaveAS"/>
-                <MenuItem text="Print..." onAction="#FileMenu_Print"/>
+                <MenuItem text="New" onAction="#FileMenu_New" accelerator="Ctrl+N"/>
+                <MenuItem text="Open" onAction="#FileMenu_Open" accelerator="Ctrl+O"/>
+                <MenuItem text="Save" onAction="#FileMenu_Save" accelerator="Ctrl+S"/>
+                <MenuItem text="Save as" onAction="#FileMenu_SaveAS" accelerator="Ctrl+Shift+S"/>
+                <MenuItem text="Print..." onAction="#FileMenu_Print" accelerator="Ctrl+P"/>
+
+
+                <CustomMenuItem fx:id="autoSaveDelayItem" hideOnClick="false">
+                    <content>
+                        <HBox spacing="5" alignment="CENTER_LEFT">
+                            <Label text="Set Autosave Delay" style="-fx-text-fill: black"/>
+                            <TextField fx:id="autoSaveDelayField" text="2" prefWidth="30" visible="false"/>
+                            <Label text="mins" style="-fx-text-fill: black"/>
+                        </HBox>
+                    </content>
+                </CustomMenuItem>
                 <MenuItem text="Exit" onAction="#FileMenu_Exit"/>
             </Menu>
 
+
+
+
+
             <!--            // Edit menu-->
             <Menu text="Edit">
-                <MenuItem text="Date &amp; Time" onAction="#EditMenu_date_time"/>
-                <MenuItem text="Select all" onAction="#EditMenu_selectAll"/>
-                <MenuItem text="Go to" onAction="#EditMenu_goTo"/>
-                <MenuItem text="Duplicate" onAction="#EditMenu_copy_paste"/>
-                <MenuItem text="Delete" onAction="#EditMenu_delete"/>
-                <MenuItem text="Cut" onAction="#EditMenu_cut"/>
-                <MenuItem text="Copy" onAction="#EditMenu_copy"/>
-                <MenuItem text="Paste" onAction="#EditMenu_paste"/>
+                <MenuItem text="Date &amp; Time" onAction="#EditMenu_date_time" accelerator="F5"/>
+                <MenuItem text="Select all" onAction="#EditMenu_selectAll" accelerator="Ctrl+A"/>
+                <MenuItem text="Go to" onAction="#EditMenu_goTo" accelerator="Ctrl+T"/>
+                <MenuItem text="Duplicate" onAction="#EditMenu_copy_paste" accelerator="Ctrl+D"/>
+                <MenuItem text="Delete" onAction="#EditMenu_delete" accelerator="delete"/>
+                <MenuItem text="Cut" onAction="#EditMenu_cut" accelerator="Ctrl+X"/>
+                <MenuItem text="Copy" onAction="#EditMenu_copy" accelerator="Ctrl+C"/>
+                <MenuItem text="Paste" onAction="#EditMenu_paste" accelerator="Ctrl+V"/>
             </Menu>
 
-            <!--            // Format menu-->
+            <!--             Format menu-->
             <Menu text="Format">
-                <MenuItem text="Font" onAction="#FormatMenu_font"/>
+                <MenuItem text="Font" onAction="#FormatMenu_font" accelerator="F4"/>
+                <Menu text="Set Background" onAction="#showBackgroundChooseDialog" fx:id="backgroundMenu"/>
+                <RadioMenuItem text="Wrap Text" fx:id="toggleWrapText" accelerator="F5"/>
             </Menu>
 
-            <!--            // View menu-->
+            <!--            View menu-->
             <Menu text="View">
-                <RadioMenuItem text="On-Screen keyboard" fx:id="osk" onAction="#ViewMenu_on_screen_kb"/>
+                <MenuItem text="View On-Screen keyboard" onAction="#ViewMenu_on_screen_kb" accelerator="F6"/>
+                <RadioMenuItem text="Show line numbers" selected="true" onAction="#toggleLineNum" fx:id="toggleLineNumbers" accelerator="F7"/>
             </Menu>
 
             <!--                        // Help menu-->
-            <fx:include source="help_ui.fxml"/>
+            <fx:include source="help_ui.fxml" accelerator="F2"/>
 
-            <!--            // Highlights menu-->
+            <!--             Highlights menu-->
             <Menu text="Highlights">
-                <MenuItem text="Yellow" onAction="#highlightsMenu_yellow"/>
-                <MenuItem text="Green" onAction="#highlightsMenu_green"/>
-                <MenuItem text="Red" onAction="#highlightsMenu_red"/>
+                <MenuItem text="Yellow" onAction="#highlightsMenu_yellow" accelerator="Ctrl+1"/>
+                <MenuItem text="Green" onAction="#highlightsMenu_green" accelerator="Ctrl+2"/>
+                <MenuItem text="Red" onAction="#highlightsMenu_red" accelerator="Ctrl+3"/>
             </Menu>
 
         </MenuBar>
@@ -59,5 +75,28 @@
             <fx:include fx:id="suggestionBox" source="suggestion_box_ui.fxml"/>
         </StackPane>
     </center>
+
+    <!--     Bottom-->
+    <bottom>
+        <HBox style="-fx-background-color: lightgrey;-fx-border-color: #908686 transparent transparent transparent;-fx-border-width: 1 0 0 0;" spacing="0">
+
+            <HBox style="-fx-padding: 3 10 3 10;">
+                <Label fx:id="showSelectedCharacters"  prefWidth="160" text="Selected: 0 chars, 0 words"/>
+            </HBox>
+
+            <Separator  orientation="VERTICAL" fx:id="separator1" styleClass="custom-separator"/>
+
+            <HBox style="-fx-padding: 3 10 3 10;">
+                <Label fx:id="currentCaretPosition" prefWidth="120" text="At: 1 Line, 1 Col"/>
+            </HBox>
+
+            <Separator orientation="VERTICAL" styleClass="custom-separator"/>
+
+            <HBox style="-fx-padding: 3 10 3 10;">
+                <Label fx:id="showTotal" text="0 characters, 0 words" prefWidth="160"/>
+            </HBox>
+
+        </HBox>
+    </bottom>
 
 </BorderPane>

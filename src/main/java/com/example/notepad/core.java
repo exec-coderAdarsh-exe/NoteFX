@@ -8,6 +8,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Popup;
 import javafx.stage.Stage;
@@ -17,10 +18,7 @@ import org.fxmisc.richtext.CodeArea;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class core {
 
@@ -35,45 +33,194 @@ public class core {
     }};
     private final List<String> colorCycle = List.of("YELLOW", "GREEN", "RED", "NONE");
     public StackPane suggestionBox;
-    public RadioMenuItem osk;
+    public CustomMenuItem autoSaveDelayItem;
+    public TextField autoSaveDelayField;
+    public RadioMenuItem toggleLineNumbers;
+    public RadioMenuItem toggleWrapText;
+    // Bottom Fields
+    public Label currentCaretPosition;
+    public Label showSelectedCharacters;
+    public Label showTotal;
+    public Separator separator1;
+    public Menu backgroundMenu;
+
+    //    private ColorPicker colorPickDialog;
+    private Popup formatPopup;
+
+
 
     @FXML
     private BorderPane editorContainer;
-
     @FXML
     private suggestion_handler suggestionBoxController;
-
     @FXML
     private StackPane editorStack;
-
     private File currentFile = null;
     private boolean isModified = false;
     private OptFile_handler fileHandler;
+    // Class-level variable to keep track
     private OptEdit_handler editHandler;
-    private int lastMatchIndex = -1;
-    private int lastFindIndex = -1;  // Class-level variable to keep track
+
+    // REPLACE THIS METHOD
+    public int getAutoSaveDelay() {
+        String input = autoSaveDelayField.getText();
+        try {
+            int val = Integer.parseInt(input);
+            return Math.max(1, Math.min(val, 30));
+        } catch (NumberFormatException e) {
+            return 3;
+        }
+    }
+
+
 
     @FXML
     public void initialize() {
         codeArea = new CodeArea();
         codeArea.setFocusTraversable(true);
         codeArea.setStyle("-fx-font-family: 'Consolas'; -fx-font-size: 14px;");
-        codeArea.setParagraphGraphicFactory(createLineNumberFactory());
+
+
+        toggleLineNum();
+
+        toggleWrapText.setOnAction(_ -> codeArea.setWrapText(toggleWrapText.isSelected()));
+
+
         VirtualizedScrollPane<CodeArea> vsPane = new VirtualizedScrollPane<>(codeArea);
         editorStack.getChildren().addFirst(vsPane);
         suggestionBoxController.setCodeArea(codeArea);
         fileHandler = new OptFile_handler(this);
         editHandler = new OptEdit_handler(this);
+
         codeArea.textProperty().addListener((_, _, newText) -> {
             isModified = true;
             Stage stage = (Stage) getEditorContainer().getScene().getWindow();
             if (newText.isEmpty()) {
-                stage.setTitle("Notepad");
+                stage.setTitle("NoteFX");
                 setModified(false);
             } else {
+                updateStatusBar();
                 stage.setTitle("Unsaved Changes");
             }
         });
+        codeArea.caretPositionProperty().addListener((_, _, _) -> {
+            updateStatusBar();
+        });
+
+        autoSaveDelayField.textProperty().addListener((_, _, newText) -> {
+            if (!newText.matches("\\d*")) {
+                autoSaveDelayField.setText(newText.replaceAll("\\D",""));
+            } else if (!newText.isEmpty()) {
+                try{
+                    int val=Integer.parseInt(newText);
+                    if (val>30)autoSaveDelayField.setText("30");
+                    else if (val==0)autoSaveDelayField.setText("1");
+                } catch (NumberFormatException ignored){}
+            }
+        });
+        autoSaveDelayField.setOnAction(_ -> {
+            String text = autoSaveDelayField.getText().trim();
+            if (!text.matches("\\d+")) {
+                autoSaveDelayField.setText("2");
+            } else {
+                int val = Integer.parseInt(text);
+                if (val > 30) val = 30;
+                else if (val == 0) val = 1;
+                autoSaveDelayField.setText(String.valueOf(val));
+            }
+            autoSaveDelayField.getParent().requestFocus();
+        });
+
+
+        codeArea.selectedTextProperty().addListener((_, _, newText) -> {
+            updateStatusBar();
+
+            showTextStylesFormat(codeArea, (Stage) codeArea.getScene().getWindow());
+            codeArea.requestFocus();
+        });
+    }
+
+    private void updateStatusBar() {
+        int selStart = codeArea.getSelection().getStart();
+        int selEnd = codeArea.getSelection().getEnd();
+
+        int selectedChars = Math.abs(selEnd - selStart);
+        int selectedWords = countFullySelectedWords(codeArea,"selected");
+        showSelectedCharacters.setText("Selected: "+selectedChars+" chars, "+selectedWords+" words");
+
+        int totalChars=countFullySelectedWords(codeArea,"fullChars");
+        int totalWords = countFullySelectedWords(codeArea,"fullWords");
+        showTotal.setText(totalChars+" characters, "+totalWords+" words");
+
+        int currentLine=codeArea.getCurrentParagraph()+1;
+        int caretColumn =codeArea.getCaretColumn()+1;
+        currentCaretPosition.setText("At: "+currentLine+" Line, "+ caretColumn +" Col");
+    }
+
+    private int countFullySelectedWords(CodeArea codeArea,String whichOne) {
+        String fullText = codeArea.getText();
+        IndexRange sel = codeArea.getSelection();
+        int start = sel.getStart();
+        int end = sel.getEnd();
+
+        String selectedText = fullText.substring(start, end).trim();
+
+        if (fullText.isBlank()) {
+            return 0;
+        }
+
+
+        if (whichOne.equals("fullWords")){
+            selectedText=fullText;
+            start=0;
+            end=selectedText.length();
+        }else if (whichOne.equals("fullChars")){
+            return fullText.length();
+        }
+        else if (start == end) {
+            return 0;
+        }
+
+
+
+
+
+        if (selectedText.isEmpty()) return 0;
+
+        StringTokenizer tokenizer=new StringTokenizer(selectedText," ");
+        int wordCount =tokenizer.countTokens();
+
+        boolean startMidWord = start > 0 &&
+                Character.isLetterOrDigit(fullText.charAt(start - 1)) &&
+                Character.isLetterOrDigit(fullText.charAt(start));
+
+        boolean endMidWord = end < fullText.length() &&
+                Character.isLetterOrDigit(fullText.charAt(end - 1)) &&
+                Character.isLetterOrDigit(fullText.charAt(end));
+
+        if (startMidWord) wordCount--;
+        if (endMidWord) wordCount--;
+
+        return Math.max(wordCount, 0);
+    }
+
+
+
+
+
+    private void applyBG(Color color) {
+        String hex=String.format("#%02x%02x%02x",(int)(color.getRed()*255),(int)(color.getGreen()*255),(int)(color.getBlue()*255));
+        double red=color.getRed();
+        double green=color.getGreen();
+        double blue=color.getBlue();
+
+        double luminance = 0.2126*red + 0.7152*green + 0.0722*blue;
+        Color resultTColor=(luminance<0.5)?Color.CYAN:Color.GOLD;
+        String hexText=String.format("#%02x%02x%02x",(int)(resultTColor.getRed()*255),(int)(resultTColor.getGreen()*255),(int)(resultTColor.getBlue()*255));
+
+
+        codeArea.setStyle("-fx-background-color: "+hex+";"+"-fx-text-fill: "+hexText+";");
+
     }
 
     public java.util.function.IntFunction<Node> createLineNumberFactory() {
@@ -138,21 +285,28 @@ public class core {
 
     private void showHighlightDialog(String color) {
         List<Integer> lines = colorGroups.getOrDefault(color, List.of());
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Highlights: " + color);
-        alert.setHeaderText(null);
 
         if (lines.isEmpty()) {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Highlights: " + color);
+            alert.setHeaderText(null);
             alert.setContentText("No lines highlighted in " + color + ".");
-        } else {
-            StringBuilder content = new StringBuilder("Lines highlighted in " + color + ":\n");
-            for (Integer line : lines) {
-                content.append("Line ").append(line).append("\n");
-            }
-            alert.setContentText(content.toString());
+            alert.showAndWait();
+            return;
         }
-        alert.showAndWait();
+
+        ChoiceDialog<Integer> dialog = new ChoiceDialog<>(lines.getFirst(), lines);
+        dialog.setTitle("Go to Highlighted Line");
+        dialog.setHeaderText("Highlighted lines in " + color);
+        dialog.setContentText("Select a line:");
+
+        dialog.showAndWait().ifPresent(line -> {
+            // Navigate to the selected line
+            codeArea.moveTo(line - 1, 0);  // 0-based index
+            codeArea.requestFollowCaret();
+        });
     }
+
 
     // Accessors for OptFile_handler
     public CodeArea getCodeArea() { return codeArea; }
@@ -210,6 +364,7 @@ public class core {
         } catch (IOException _) {}
     }
 
+
     public void registerShortcutKeys(Scene scene) {
         shortcutKey_handler shortcutHandler = new shortcutKey_handler(new shortcutKey_handler.ShortcutListener() {
             @Override
@@ -261,7 +416,7 @@ public class core {
         replaceField.setPromptText("Replace");
 
         Button interchangeButton = new Button("⇄");
-        interchangeButton.setOnAction(e -> {
+        interchangeButton.setOnAction(_ -> {
             String temp = findField.getText();
             findField.setText(replaceField.getText());
             replaceField.setText(temp);
@@ -279,11 +434,11 @@ public class core {
         HBox buttons = new HBox(8, findButton, replaceButton, replaceAllButton);
         layout.getChildren().addAll(new Label("Find and Replace:"), findReplaceRow, buttons, closeButton);
         popup.getContent().add(layout);
-        findField.setOnAction(e -> findNext(findField.getText()));
-        findButton.setOnAction(e -> findNext(findField.getText()));
-        replaceButton.setOnAction(e -> replaceSelected(replaceField.getText()));
-        replaceAllButton.setOnAction(e -> replaceAll(findField.getText(), replaceField.getText()));
-        closeButton.setOnAction(e -> popup.hide());
+        findField.setOnAction(_ -> findNext(findField.getText()));
+        findButton.setOnAction(_ -> findNext(findField.getText()));
+        replaceButton.setOnAction(_ -> replaceSelected(replaceField.getText()));
+        replaceAllButton.setOnAction(_ -> replaceAll(findField.getText(), replaceField.getText()));
+        closeButton.setOnAction(_ -> popup.hide());
         Stage stage = (Stage) codeArea.getScene().getWindow();
         popup.show(stage);
     }
@@ -307,14 +462,12 @@ public class core {
         }
         codeArea.selectRange(index, index + query.length());
         codeArea.requestFocus();
-        lastFindIndex = index;
     }
 
     private void replaceSelected(String replacement) {
         if (codeArea.getSelectedText().isEmpty()) return;
 
         codeArea.replaceSelection(replacement);
-        lastMatchIndex = -1;
     }
 
     private void replaceAll(String searchText, String replacement) {
@@ -323,6 +476,110 @@ public class core {
         String content = codeArea.getText();
         String updated = content.replace(searchText, replacement);
         codeArea.replaceText(updated);
-        lastMatchIndex = -1;
+    }
+
+    public void toggleLineNum() {
+        if (toggleLineNumbers.isSelected())
+            codeArea.setParagraphGraphicFactory(createLineNumberFactory());
+        else codeArea.setParagraphGraphicFactory(null);
+    }
+
+    public void showTextStylesFormat(CodeArea codeArea, Stage primaryStage) {
+        // If popup already exists, hide it first
+        if (formatPopup != null && formatPopup.isShowing()) {
+            formatPopup.hide();
+        }
+
+        formatPopup = new Popup();
+
+        ToolBar toolBar = new ToolBar();
+        toolBar.setStyle("-fx-background-color: #f0f0f0; -fx-border-color: #aaa; -fx-border-width: 1; -fx-padding: 4; -fx-spacing: 6;");
+
+        // --- Buttons ---
+        Button bold = new Button("B");
+        bold.setStyle("-fx-font-weight: bold; -fx-padding: 2 6; -fx-font-size: 12;");
+        bold.setOnAction(_ -> applyStyle(codeArea, "-fx-font-weight: bold"));
+
+        Button italic = new Button("I");
+        italic.setStyle("-fx-font-style: italic; -fx-padding: 2 6; -fx-font-size: 12;");
+        italic.setOnAction(_ -> applyStyle(codeArea, "-fx-font-style: italic"));
+
+        Button underline = new Button("U");
+        underline.setStyle("-fx-underline: true; -fx-padding: 2 6; -fx-font-size: 12;");
+        underline.setOnAction(_ -> applyStyle(codeArea, "-fx-underline: true"));
+
+        ColorPicker fontColorPicker = new ColorPicker();
+        fontColorPicker.setPrefWidth(65);
+        fontColorPicker.setOnAction(_ -> {
+            String color = toRgbCode(fontColorPicker.getValue());
+            applyStyle(codeArea, "-fx-fill: " + color);
+        });
+
+        ColorPicker highlightColorPicker = new ColorPicker();
+        highlightColorPicker.setPrefWidth(65);
+        highlightColorPicker.setOnAction(_ -> {
+            String color = toRgbCode(highlightColorPicker.getValue());
+            applyStyle(codeArea, "-fx-background-color: " + color);
+        });
+
+        toolBar.getItems().addAll(bold, italic, underline, fontColorPicker, highlightColorPicker);
+        formatPopup.getContent().add(toolBar);
+
+        // Prevent focus steal
+        toolBar.getItems().forEach(item -> {
+            if (item instanceof Control c) c.setFocusTraversable(false);
+        });
+
+        formatPopup.setAutoFix(true);
+        formatPopup.setAutoHide(true);
+        formatPopup.setHideOnEscape(true);
+
+        // Hide when window is unfocused
+        primaryStage.focusedProperty().addListener((obs, wasFocused, isFocused) -> {
+            if (!isFocused) formatPopup.hide();
+        });
+
+        // Hide when selection is cleared
+        codeArea.selectedTextProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal == null || newVal.isBlank()) {
+                formatPopup.hide();
+            }
+        });
+
+        // Show at selection position
+        codeArea.requestFocus();
+        codeArea.getCaretBounds().ifPresent(bounds -> {
+            formatPopup.show(codeArea, bounds.getMaxX(), bounds.getMaxY());
+        });
+
+    }
+
+
+
+    private void applyStyle(CodeArea codeArea, String style) {
+        int start = codeArea.getSelection().getStart();
+        int end = codeArea.getSelection().getEnd();
+        if (start != end) {
+            codeArea.setStyle(start, end, Collections.singleton(style));
+        }
+    }
+
+
+    private String toRgbCode(Color color) {
+        return String.format("rgb(%d,%d,%d)",
+                (int) (color.getRed() * 255),
+                (int) (color.getGreen() * 255),
+                (int) (color.getBlue() * 255));
+    }
+
+    public void showBackgroundChooseDialog() {
+        ColorPicker colorPicker = new ColorPicker();
+        MenuItem menuItem = new MenuItem();
+        menuItem.setGraphic(colorPicker);
+        backgroundMenu.getItems().add(menuItem);
+        menuItem.setOnAction(_ -> {
+            colorPicker.show();
+        });
+
     }
 }

@@ -1,0 +1,33 @@
+.note-menu-bar .menu:showing,
+    .note-menu-bar .menu:focused,
+    .note-menu-bar .menu:hover{
+    -fx-border-color: #838383;
+    -fx-border-width: 1;
+    -fx-background-radius: 2;
+    -fx-border-radius: 2;
+    -fx-background-color: #1b587a;
+    -fx-text-fill: black;
+}
+
+.note-menu-bar .menu-item:hover,
+.note-menu-bar .menu-item:showing,
+.note-menu-bar .menu-item:focused{
+    -fx-background-color: #5ea1c8;
+    -fx-opacity: 0.9;
+    -fx-text-fill: black;
+    -fx-border-color: #838383;
+    -fx-border-width: 1;
+    -fx-background-radius: 2;
+    -fx-border-radius: 2;
+}
+.note-menu-bar .menu,
+.note-menu-bar .menu-item{
+    -fx-border-radius: 2;
+    -fx-border-color: transparent;
+}
+
+.custom-separator{
+    -fx-background-color: black;
+    -fx-min-width: 0.5;
+    -fx-pref-width: 0.5;
+}

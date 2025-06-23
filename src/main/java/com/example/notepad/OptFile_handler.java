@@ -28,20 +28,51 @@ public class OptFile_handler {
         else saveToFile(file);
     }
 
-    public static void draftSave(Path originalPath){
+    public static void draftSave(Path originalPath) {
         try {
-            String userHome=System.getProperty("user.home");
-            Path draftDir=Paths.get(userHome,"Documents","Notepad Drafts");
+            String userHome = System.getProperty("user.home");
+            String fileBaseName = originalPath != null ? originalPath.getFileName().toString().replaceAll("\\.txt$", "") : "Untitled";
+            Path draftDir = Paths.get(userHome, "Documents", "NoteFx Drafts", fileBaseName);
             Files.createDirectories(draftDir);
 
-            String originalFileName=originalPath!=null?originalPath.getFileName().toString():"Untitled";
-            String draftFileName= originalFileName.replaceAll("\\.txt$","")+".draft.txt";
-            Path draftFile=draftDir.resolve(draftFileName);
-            String content=controller.getCodeArea().getText();
-            Files.writeString(draftFile,content, StandardOpenOption.CREATE,StandardOpenOption.TRUNCATE_EXISTING);
-
-        } catch (IOException _){}
+            saveTimestampedDraft(draftDir, fileBaseName);
+            cleanOldDrafts(draftDir);
+        } catch (IOException e) {
+            showError("Draft Save Error", "Could not save draft", e.getMessage());
+        }
     }
+    private static void saveTimestampedDraft(Path draftDir, String baseName) throws IOException {
+        String timeStamp = java.time.LocalDateTime.now()
+                .toString()
+                .replace(":", "-")
+                .replace(".", "-");
+        String draftFileName = baseName + "_" + timeStamp + ".draft.txt";
+        Path draftFile = draftDir.resolve(draftFileName);
+        String content = controller.getCodeArea().getText();
+        Files.writeString(draftFile, content, StandardOpenOption.CREATE_NEW);
+    }
+
+    private static void cleanOldDrafts(Path draftDir) throws IOException {
+        try (var files = Files.list(draftDir)) {
+            files.filter(p -> p.getFileName().toString().endsWith(".draft.txt"))
+                    .sorted((a, b) -> {
+                        try {
+                            return Files.getLastModifiedTime(b).compareTo(Files.getLastModifiedTime(a));
+                        } catch (IOException e) {
+                            return 0;
+                        }
+                    })
+                    .skip(5)
+                    .forEach(p -> {
+                        try {
+                            Files.deleteIfExists(p);
+                        } catch (IOException ignored) {}
+                    });
+        }
+    }
+
+
+
 
     public static void saveFileAs() {
         FileChooser chooser = new FileChooser();
@@ -64,7 +95,6 @@ public class OptFile_handler {
     }
 
     public static void exitApplication() {
-        draftSave(Path.of("/home/aditya/Pictures"));
         if (hasUnsavedChanges() && confirmAndSaveIfNeeded()) return;
         Platform.exit();
     }

@@ -40,10 +40,11 @@ public class suggestion_handler {
         if (!suggestionPopup.getContent().contains(suggestionList)) {
             suggestionPopup.getContent().add(suggestionList);
         }
-
     }
 
+
     public void setCodeArea(CodeArea area) {
+
         this.codeArea = area;
         attachListeners();
     }
@@ -122,6 +123,12 @@ public class suggestion_handler {
                     hideSuggestions();
                     OptFile_handler.exitApplication();
                 });
+                stage.focusedProperty().addListener((_, _, newValue) -> {
+                    if (!newValue) {
+                        hideSuggestions();
+                    }
+                });
+
             });
         });
     }
