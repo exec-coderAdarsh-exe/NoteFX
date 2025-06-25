@@ -116,6 +116,8 @@ public class suggestion_handler {
             }
             else codeArea.requestFocus();
 
+            if (event.isControlDown()  && event.getCode()==KeyCode.F) core.showFindDialog();
+
             Platform.runLater(() -> {
                 Stage stage = (Stage) codeArea.getScene().getWindow();
                 stage.setOnCloseRequest(e -> {
@@ -201,9 +203,7 @@ public class suggestion_handler {
         suggestionList.setPrefHeight(3 * cellSize);
 
         if (flag) {
-            codeArea.getCaretBounds().ifPresent(bounds -> {
-                suggestionPopup.show(codeArea, bounds.getMaxX(), bounds.getMaxY());
-            });
+            codeArea.getCaretBounds().ifPresent(bounds -> suggestionPopup.show(codeArea, bounds.getMaxX(), bounds.getMaxY()));
         } else {
             suggestionPopup.hide();
             codeArea.requestFocus();

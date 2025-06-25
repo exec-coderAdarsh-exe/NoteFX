@@ -1,3 +1,27 @@
+.hbox-style {
+    -fx-text-fill: black !important;
+    -fx-background-color: #f2f2f2;
+    -fx-border-color: #000000 transparent #acacac transparent;
+    -fx-border-width: 1 0 1 0;
+}
+
+.note-menu-bar .menu,
+.note-menu-bar .menu-item {
+    -fx-text-fill: black !important;
+}
+
+
+
+
+.note-menu-bar .menu:hover,
+.note-menu-bar .menu:focused,
+.note-menu-bar .menu:showing,
+.note-menu-bar .menu-item:hover,
+.note-menu-bar .menu-item:focused,
+.note-menu-bar .menu-item:showing {
+    -fx-text-fill: black !important;
+}
+
 .note-menu-bar .menu:showing,
     .note-menu-bar .menu:focused,
     .note-menu-bar .menu:hover{
@@ -8,7 +32,6 @@
     -fx-background-color: #1b587a;
     -fx-text-fill: black;
 }
-
 .note-menu-bar .menu-item:hover,
 .note-menu-bar .menu-item:showing,
 .note-menu-bar .menu-item:focused{
@@ -20,14 +43,76 @@
     -fx-background-radius: 2;
     -fx-border-radius: 2;
 }
+
 .note-menu-bar .menu,
 .note-menu-bar .menu-item{
     -fx-border-radius: 2;
     -fx-border-color: transparent;
+    -fx-text-fill: black;
 }
+
+
 
 .custom-separator{
     -fx-background-color: black;
     -fx-min-width: 0.5;
     -fx-pref-width: 0.5;
+    -fx-text-fill: black;
+}
+
+.bgMenuOpt .menu-item {
+    -fx-background-color: white;
+    -fx-text-fill: black;
+    -fx-padding: 6 12 6 12;
+    -fx-border-radius: 5;
+    -fx-background-radius: 5;
+}
+
+.bgMenuOpt .menu-item:hover,
+.bgMenuOpt .menu-item:focused {
+    -fx-background-color: #5ea1c8;
+    -fx-border-color: #838383;
+    -fx-border-width: 1;
+    -fx-text-fill: black;
+    -fx-cursor: hand;
+}
+
+.bgMenuOpt .custom-menu-label {
+    -fx-text-fill: #000000;
+}
+
+.topButtonStyle {
+    -fx-pref-width: 26;
+    -fx-pref-height: 25;
+    -fx-min-width: 26;
+    -fx-min-height: 25;
+    -fx-background-color: transparent;
+    -fx-border-radius: 3;
+    -fx-border-width: 1;
+    -fx-border-color: #acacac;
+    -fx-background-radius: 3;
+}
+.topButtonStyle:pressed{
+    -fx-background-color: #d6d6d6;
+}
+
+.fontSizeVBox {
+    -fx-pref-width: 26;
+    -fx-pref-height: 25;
+    -fx-min-width: 26;
+    -fx-min-height: 25;
+    -fx-background-color: transparent;
+    -fx-border-radius: 3;
+    -fx-border-width: 1;
+    -fx-border-color: #acacac;
+    -fx-background-radius: 3;
+}
+.bold {
+    -fx-font-weight: bold;
+}
+.italic {
+    -fx-font-style: italic;
+}
+.underline {
+    -fx-underline: true;
 }

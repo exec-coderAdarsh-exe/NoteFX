@@ -32,7 +32,6 @@ public class Main extends Application {
         Scene scene = new Scene(fxmlLoader.load(), width, height);
 
         core controller = fxmlLoader.getController();
-        controller.registerShortcutKeys(scene);
         stage.setTitle("NoteFX");
         stage.setScene(scene);
         stage.show();
