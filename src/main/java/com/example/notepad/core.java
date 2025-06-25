@@ -213,21 +213,21 @@ public class core {
         codeArea.selectedTextProperty().addListener((_, _, _) -> {
             updateStatusBar();
 
-                if (formatPopup == null) {
-                    showTextStylesFormat(codeArea, (Stage) codeArea.getScene().getWindow());
+            if (formatPopup == null) {
+                showTextStylesFormat(codeArea, (Stage) codeArea.getScene().getWindow());
+            }
+
+            codeArea.getCaretBounds().ifPresent(bounds -> Platform.runLater(() -> {
+                if (formatPopup != null && !formatPopup.isShowing()) {
+                    formatPopup.show(codeArea, bounds.getMaxX(), bounds.getMaxY());
                 }
-
-                codeArea.getCaretBounds().ifPresent(bounds -> Platform.runLater(() -> {
-                    if (formatPopup != null && !formatPopup.isShowing()) {
-                        formatPopup.show(codeArea, bounds.getMaxX(), bounds.getMaxY());
-                    }
-                }));
-
-                codeArea.requestFocus();
-            });
-
+            }));
 
             codeArea.requestFocus();
+        });
+
+
+        codeArea.requestFocus();
 
 
         setupBackgroundMenu();
@@ -460,48 +460,30 @@ public class core {
     }
 
     public void showTextStylesFormat(CodeArea codeArea, Stage primaryStage) {
-        // If popup already exists, hide it first
         if (formatPopup != null && formatPopup.isShowing()) {
             formatPopup.hide();
         }
 
         formatPopup = new Popup();
 
-        // spacing = 6
         HBox toolBar = new HBox(6);
         toolBar.setStyle("-fx-background-color: #f0f0f0; -fx-border-color: #aaa; -fx-border-width: 1; -fx-padding: 4;");
         toolBar.setAlignment(Pos.CENTER_LEFT);
+        toolBar.setFocusTraversable(false);
 
+        ToggleButton bold = new ToggleButton("B");
+        bold.setOnAction(_ -> applyStyle(codeArea, "bold", bold.isSelected()));
+        bold.setFocusTraversable(false);
 
-        // --- Buttons ---
-        Button bold = new Button("B");
-        bold.setOnAction(_ -> applyStyle(codeArea,"bold"));
+        ToggleButton italic = new ToggleButton("I");
+        italic.setOnAction(_ -> applyStyle(codeArea, "italic", italic.isSelected()));
+        italic.setFocusTraversable(false);
 
-        Button italic = new Button("I");
-        italic.setStyle("-fx-font-style: italic; -fx-padding: 2 6; -fx-font-size: 12;");
-        italic.setOnAction(_ -> applyStyle(codeArea, "italic"));
+        ToggleButton underline = new ToggleButton("U");
+        underline.setOnAction(_ -> applyStyle(codeArea, "underline", underline.isSelected()));
+        underline.setFocusTraversable(false);
 
-        Button underline = new Button("U");
-        underline.setStyle("-fx-underline: true; -fx-padding: 2 6; -fx-font-size: 12;");
-        underline.setOnAction(_ -> applyStyle(codeArea, "underline"));
-
-
-        ColorPicker fontColorPicker = new ColorPicker();
-        fontColorPicker.setPrefWidth(65);
-        fontColorPicker.setOnAction(_ -> {
-            String color = toRgbCode(fontColorPicker.getValue());
-            applyStyle(codeArea, "-fx-fill: " + color);
-        });
-
-        ColorPicker highlightColorPicker = new ColorPicker();
-        highlightColorPicker.setPrefWidth(65);
-        highlightColorPicker.setOnAction(_ -> {
-            String color = toRgbCode(highlightColorPicker.getValue());
-            applyStyle(codeArea, "-fx-background-color: " + color);
-        });
-
-
-        toolBar.getChildren().addAll(bold, italic, underline, fontColorPicker, highlightColorPicker);
+        toolBar.getChildren().addAll(bold, italic, underline);
         formatPopup.getContent().add(toolBar);
 
         formatPopup.setAutoFix(true);
@@ -511,28 +493,47 @@ public class core {
         codeArea.selectedTextProperty().addListener((_, _, newVal) -> {
             if (newVal == null || newVal.isBlank()) {
                 formatPopup.hide();
+            } else {
+                Platform.runLater(() -> {
+                    codeArea.getCaretBounds().ifPresent(bounds -> {
+                        if (!formatPopup.isShowing()) {
+                            formatPopup.show(codeArea, bounds.getMinX(), bounds.getMaxY());
+                        }
+                    });
+                });
             }
         });
-        // Hide when window is unfocused
+
         primaryStage.focusedProperty().addListener((_, _, isFocused) -> {
             if (!isFocused) formatPopup.hide();
         });
 
-        // Hide when selection is cleared
-
-        // Show at selection position
-        codeArea.requestFocus();
-        codeArea.getCaretBounds().ifPresent(bounds -> formatPopup.show(codeArea, bounds.getMaxX(), bounds.getMaxY()));
-
+        Platform.runLater(codeArea::requestFocus);
     }
 
-    private void applyStyle(CodeArea codeArea, String styleClass) {
-        int start = codeArea.getSelection().getStart();
-        int end = codeArea.getSelection().getEnd();
-        if (start != end) {
-            codeArea.setStyle(start, end, Collections.singleton(styleClass)); // Now it’s a class
+
+    private void applyStyle(CodeArea codeArea, String styleClass, boolean enable) {
+        IndexRange range = codeArea.getSelection();
+        int start = range.getStart();
+        int end = range.getEnd();
+
+        if (start == end) return; // no selection
+
+        for (int i = start; i < end; i++) {
+            Collection<String> existing = new ArrayList<>(codeArea.getStyleOfChar(i));
+            if (enable) {
+                if (!existing.contains(styleClass)) {
+                    existing.add(styleClass);
+                }
+            } else {
+                existing.remove(styleClass);
+            }
+            codeArea.setStyle(i, i + 1, existing);
         }
+
+        Platform.runLater(codeArea::requestFocus);
     }
+
 
 
 
