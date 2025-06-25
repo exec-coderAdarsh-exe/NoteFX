@@ -29,11 +29,13 @@ public class core {
     public static double fontSize=14;
     public static CodeArea codeArea;
     private final Map<Integer, String> lineColorMap = new HashMap<>();
+
     private final Map<String, List<Integer>> colorGroups = new HashMap<>() {{
         put("YELLOW", new ArrayList<>());
         put("GREEN", new ArrayList<>());
         put("RED", new ArrayList<>());
     }};
+
     private final List<String> colorCycle = List.of("YELLOW", "GREEN", "RED", "NONE");
     public StackPane suggestionBox;
     public CustomMenuItem autoSaveDelayItem;
@@ -46,8 +48,15 @@ public class core {
     public Label showTotal;
     public Separator separator1;
     public Menu backgroundMenu;
+
+
     public VBox fontSizeVBoxTop;
     public TextField fontSizeTF_top;
+    public ToggleButton topUnderlineBtn;
+    public ToggleButton topItalicBtn;
+    public ToggleButton topBoldBtn;
+
+
     //    private ColorPicker colorPickDialog;
     private Popup formatPopup;
     @FXML
@@ -210,10 +219,10 @@ public class core {
         });
 
 
-        codeArea.selectedTextProperty().addListener((_, _, _) -> {
+        codeArea.selectedTextProperty().addListener((_, _, newVal) -> {
             updateStatusBar();
 
-            if (formatPopup == null) {
+            if (formatPopup == null && !newVal.isBlank()) {
                 showTextStylesFormat(codeArea, (Stage) codeArea.getScene().getWindow());
             }
 
@@ -238,6 +247,8 @@ public class core {
         });
 
         fontSizeTopHandle();
+
+
 
 
         Platform.runLater(() -> codeArea.requestFocus());
@@ -491,12 +502,15 @@ public class core {
         formatPopup.setHideOnEscape(true);
 
         codeArea.selectedTextProperty().addListener((_, _, newVal) -> {
-            if (newVal == null || newVal.isBlank()) {
+            if (newVal == null || newVal.isBlank() || codeArea.getSelection()==null) {
+                toolBar.setVisible(false);
                 formatPopup.hide();
             } else {
+                toolBar.setVisible(true);
                 Platform.runLater(() -> {
                     codeArea.getCaretBounds().ifPresent(bounds -> {
                         if (!formatPopup.isShowing()) {
+
                             formatPopup.show(codeArea, bounds.getMinX(), bounds.getMaxY());
                         }
                     });
@@ -584,5 +598,27 @@ public class core {
     public void fontSizeTopHandle() {
         fontSizeVBoxTop.addEventFilter(MouseEvent.MOUSE_PRESSED, _ -> fontSizeVBoxTop.setStyle("-fx-background-color: #d6d6d6"));
         fontSizeVBoxTop.addEventFilter(MouseEvent.MOUSE_RELEASED,_ -> fontSizeVBoxTop.setStyle("-fx-background-color: transparent"));
+
+        topBoldBtn.setOnAction(_ ->{
+            applyStyle(codeArea, "bold", topBoldBtn.isSelected());
+            if (topBoldBtn.isSelected()) {
+                topBoldBtn.setStyle("-fx-background-color: lightgrey;");
+            }
+        });
+
+        topItalicBtn.setOnAction(_ ->{
+            applyStyle(codeArea, "italic", topItalicBtn.isSelected());
+            if (topItalicBtn.isSelected()) {
+                topItalicBtn.setStyle("-fx-background-color: lightgrey;");
+            }
+        });
+
+        topUnderlineBtn.setOnAction(_ ->{
+            applyStyle(codeArea, "underline", topUnderlineBtn.isSelected());
+            if (topUnderlineBtn.isSelected()) {
+                topUnderlineBtn.setStyle("-fx-background-color: lightgrey;");
+            }
+        });
+
     }
 }

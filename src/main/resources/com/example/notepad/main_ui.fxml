@@ -69,9 +69,9 @@
                 </Menu>
             </MenuBar>
 
-            <Button text="B" styleClass="topButtonStyle"/>
-            <Button text="I" styleClass="topButtonStyle"/>
-            <Button text="U" styleClass="topButtonStyle"/>
+            <ToggleButton text="B" fx:id="topBoldBtn" styleClass="topButtonStyle"/>
+            <ToggleButton text="I" fx:id="topItalicBtn" styleClass="topButtonStyle"/>
+            <ToggleButton text="U" fx:id="topUnderlineBtn" styleClass="topButtonStyle"/>
             <HBox alignment="CENTER_LEFT" style="-fx-border-width: 1;-fx-border-color: #acacac;-fx-border-radius: 3;-fx-padding: 0 0 0 3">
                 <Label text="Size "/>
                 <TextField text="14.0" fx:id="fontSizeTF_top" prefColumnCount="3"/>
