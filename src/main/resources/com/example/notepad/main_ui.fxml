@@ -4,20 +4,19 @@
 
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.shape.Rectangle?>
 <BorderPane xmlns:fx="http://javafx.com/fxml" fx:id="editorContainer" fx:controller="com.example.notepad.core" stylesheets="@notefx-menu-bar.css">
     <top>
         <HBox spacing="5" styleClass="hbox-style" alignment="CENTER_LEFT">
             <MenuBar styleClass="note-menu-bar">
 
                 <Menu text="File">
-                    <MenuItem text="New" onAction="#FileMenu_New" accelerator="Ctrl+N"/>
-                    <MenuItem text="Open" onAction="#FileMenu_Open" accelerator="Ctrl+O"/>
-                    <MenuItem text="Save" onAction="#FileMenu_Save" accelerator="Ctrl+S"/>
-                    <MenuItem text="Save as" onAction="#FileMenu_SaveAS" accelerator="Ctrl+Shift+S"/>
-                    <MenuItem text="Print..." onAction="#FileMenu_Print" accelerator="Ctrl+P"/>
+                    <MenuItem text="New" styleClass="blackText" onAction="#FileMenu_New" accelerator="Ctrl+N"/>
+                    <MenuItem text="Open" styleClass="blackText" onAction="#FileMenu_Open" accelerator="Ctrl+O"/>
+                    <MenuItem text="Save" styleClass="blackText" onAction="#FileMenu_Save" accelerator="Ctrl+S"/>
+                    <MenuItem text="Save as" styleClass="blackText" onAction="#FileMenu_SaveAS" accelerator="Ctrl+Shift+S"/>
+                    <MenuItem text="Print..." styleClass="blackText" onAction="#FileMenu_Print" accelerator="Ctrl+P"/>
                     <Menu text="Autosave Delay">
-                        <CustomMenuItem fx:id="autoSaveDelayItem" hideOnClick="false">
+                        <CustomMenuItem fx:id="autoSaveDelayItem" styleClass="blackText" hideOnClick="false">
                             <content>
                                 <HBox spacing="5" alignment="CENTER_LEFT">
                                     <Label text="Set Autosave Delay" style="-fx-text-fill: black"/>
@@ -67,20 +66,29 @@
                     <MenuItem text="Green" onAction="#highlightsMenu_green" accelerator="Ctrl+2"/>
                     <MenuItem text="Red" onAction="#highlightsMenu_red" accelerator="Ctrl+3"/>
                 </Menu>
+
+                <Menu text="Quick Styles">
+                    <RadioMenuItem fx:id="topBoldBtn" text="Bold  " accelerator="Ctrl+B"/>
+                    <RadioMenuItem fx:id="topItalicBtn" text="Italic  " accelerator="Ctrl+I" />
+                    <RadioMenuItem fx:id="topUnderlineBtn" text="Underline  " accelerator="Ctrl+U" />
+                    <Menu text="Size">
+                        <CustomMenuItem>
+                            <content>
+                                <HBox alignment="CENTER_LEFT">
+                                    <Label text="Size " style="-fx-text-fill: black"/>
+                                    <TextField text="14.0" fx:id="fontSizeTF_top" prefColumnCount="3"/>
+                                </HBox>
+                            </content>
+                        </CustomMenuItem>
+                    </Menu>
+                </Menu>
+
+
             </MenuBar>
 
-            <ToggleButton text="B" fx:id="topBoldBtn" styleClass="topButtonStyle"/>
-            <ToggleButton text="I" fx:id="topItalicBtn" styleClass="topButtonStyle"/>
-            <ToggleButton text="U" fx:id="topUnderlineBtn" styleClass="topButtonStyle"/>
-            <HBox alignment="CENTER_LEFT" style="-fx-border-width: 1;-fx-border-color: #acacac;-fx-border-radius: 3;-fx-padding: 0 0 0 3">
-                <Label text="Size "/>
-                <TextField text="14.0" fx:id="fontSizeTF_top" prefColumnCount="3"/>
-            </HBox>
-            <VBox alignment="TOP_CENTER" styleClass="fontSizeVBox" fx:id="fontSizeVBoxTop">
-                <Button text="A" style="-fx-pref-height: 20;-fx-min-height: 20;-fx-max-height: 20;-fx-background-color: transparent"/>
-                <Rectangle width="20" height="5"/>
-            </VBox>
-            
+
+
+
         </HBox>
     </top>
 

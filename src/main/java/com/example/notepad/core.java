@@ -6,7 +6,6 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.*;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
@@ -49,12 +48,10 @@ public class core {
     public Separator separator1;
     public Menu backgroundMenu;
 
-
-    public VBox fontSizeVBoxTop;
     public TextField fontSizeTF_top;
-    public ToggleButton topUnderlineBtn;
-    public ToggleButton topItalicBtn;
-    public ToggleButton topBoldBtn;
+    public RadioMenuItem topUnderlineBtn;
+    public RadioMenuItem topItalicBtn;
+    public RadioMenuItem topBoldBtn;
 
 
     //    private ColorPicker colorPickDialog;
@@ -507,14 +504,12 @@ public class core {
                 formatPopup.hide();
             } else {
                 toolBar.setVisible(true);
-                Platform.runLater(() -> {
-                    codeArea.getCaretBounds().ifPresent(bounds -> {
-                        if (!formatPopup.isShowing()) {
+                Platform.runLater(() -> codeArea.getCaretBounds().ifPresent(bounds -> {
+                    if (!formatPopup.isShowing()) {
 
-                            formatPopup.show(codeArea, bounds.getMinX(), bounds.getMaxY());
-                        }
-                    });
-                });
+                        formatPopup.show(codeArea, bounds.getMinX(), bounds.getMaxY());
+                    }
+                }));
             }
         });
 
@@ -526,39 +521,8 @@ public class core {
     }
 
 
-    private void applyStyle(CodeArea codeArea, String styleClass, boolean enable) {
-        IndexRange range = codeArea.getSelection();
-        int start = range.getStart();
-        int end = range.getEnd();
-
-        if (start == end) return; // no selection
-
-        for (int i = start; i < end; i++) {
-            Collection<String> existing = new ArrayList<>(codeArea.getStyleOfChar(i));
-            if (enable) {
-                if (!existing.contains(styleClass)) {
-                    existing.add(styleClass);
-                }
-            } else {
-                existing.remove(styleClass);
-            }
-            codeArea.setStyle(i, i + 1, existing);
-        }
-
-        Platform.runLater(codeArea::requestFocus);
-    }
 
 
-
-
-
-
-    private String toRgbCode(Color color) {
-        return String.format("rgb(%d,%d,%d)",
-                (int) (color.getRed() * 255),
-                (int) (color.getGreen() * 255),
-                (int) (color.getBlue() * 255));
-    }
 
     private void setupBackgroundMenu() {
         Label label = new Label("Background:");
@@ -596,29 +560,43 @@ public class core {
     }
 
     public void fontSizeTopHandle() {
-        fontSizeVBoxTop.addEventFilter(MouseEvent.MOUSE_PRESSED, _ -> fontSizeVBoxTop.setStyle("-fx-background-color: #d6d6d6"));
-        fontSizeVBoxTop.addEventFilter(MouseEvent.MOUSE_RELEASED,_ -> fontSizeVBoxTop.setStyle("-fx-background-color: transparent"));
-
         topBoldBtn.setOnAction(_ ->{
             applyStyle(codeArea, "bold", topBoldBtn.isSelected());
-            if (topBoldBtn.isSelected()) {
-                topBoldBtn.setStyle("-fx-background-color: lightgrey;");
-            }
         });
 
         topItalicBtn.setOnAction(_ ->{
             applyStyle(codeArea, "italic", topItalicBtn.isSelected());
-            if (topItalicBtn.isSelected()) {
-                topItalicBtn.setStyle("-fx-background-color: lightgrey;");
-            }
         });
 
         topUnderlineBtn.setOnAction(_ ->{
             applyStyle(codeArea, "underline", topUnderlineBtn.isSelected());
-            if (topUnderlineBtn.isSelected()) {
-                topUnderlineBtn.setStyle("-fx-background-color: lightgrey;");
-            }
         });
 
+    }
+
+
+    private void applyStyle(CodeArea codeArea, String styleClass, boolean enable) {
+        IndexRange range = codeArea.getSelection();
+        int start = range.getStart();
+        int end = range.getEnd();
+
+        if (start == end) {
+            start = 0;
+            end=codeArea.getText().length();
+        }; // no selection
+
+        for (int i = start; i < end; i++) {
+            Collection<String> existing = new ArrayList<>(codeArea.getStyleOfChar(i));
+            if (enable) {
+                if (!existing.contains(styleClass)) {
+                    existing.add(styleClass);
+                }
+            } else {
+                existing.remove(styleClass);
+            }
+            codeArea.setStyle(i, i + 1, existing);
+        }
+
+        Platform.runLater(codeArea::requestFocus);
     }
 }
