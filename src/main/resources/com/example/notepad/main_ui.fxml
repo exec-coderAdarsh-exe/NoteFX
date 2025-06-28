@@ -4,19 +4,22 @@
 
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.Rectangle?>
 <BorderPane xmlns:fx="http://javafx.com/fxml" fx:id="editorContainer" fx:controller="com.example.notepad.core" stylesheets="@notefx-menu-bar.css">
+
     <top>
         <HBox spacing="5" styleClass="hbox-style" alignment="CENTER_LEFT">
+            <HBox fx:id="customTabBar" spacing="10" alignment="CENTER_LEFT" style="-fx-padding: 5;" />
             <MenuBar styleClass="note-menu-bar">
 
                 <Menu text="File">
-                    <MenuItem text="New" styleClass="blackText" onAction="#FileMenu_New" accelerator="Ctrl+N"/>
-                    <MenuItem text="Open" styleClass="blackText" onAction="#FileMenu_Open" accelerator="Ctrl+O"/>
-                    <MenuItem text="Save" styleClass="blackText" onAction="#FileMenu_Save" accelerator="Ctrl+S"/>
-                    <MenuItem text="Save as" styleClass="blackText" onAction="#FileMenu_SaveAS" accelerator="Ctrl+Shift+S"/>
-                    <MenuItem text="Print..." styleClass="blackText" onAction="#FileMenu_Print" accelerator="Ctrl+P"/>
+                    <MenuItem text="New" onAction="#FileMenu_New" accelerator="Ctrl+N"/>
+                    <MenuItem text="Open" onAction="#FileMenu_Open" accelerator="Ctrl+O"/>
+                    <MenuItem text="Save" onAction="#FileMenu_Save" accelerator="Ctrl+S"/>
+                    <MenuItem text="Save as" onAction="#FileMenu_SaveAS" accelerator="Ctrl+Shift+S"/>
+                    <MenuItem text="Print..." onAction="#FileMenu_Print" accelerator="Ctrl+P"/>
                     <Menu text="Autosave Delay">
-                        <CustomMenuItem fx:id="autoSaveDelayItem" styleClass="blackText" hideOnClick="false">
+                        <CustomMenuItem fx:id="autoSaveDelayItem" hideOnClick="false">
                             <content>
                                 <HBox spacing="5" alignment="CENTER_LEFT">
                                     <Label text="Set Autosave Delay" style="-fx-text-fill: black"/>
@@ -68,9 +71,9 @@
                 </Menu>
 
                 <Menu text="Quick Styles">
-                    <RadioMenuItem fx:id="topBoldBtn" text="Bold  " accelerator="Ctrl+B"/>
-                    <RadioMenuItem fx:id="topItalicBtn" text="Italic  " accelerator="Ctrl+I" />
-                    <RadioMenuItem fx:id="topUnderlineBtn" text="Underline  " accelerator="Ctrl+U" />
+                    <RadioMenuItem fx:id="topBoldBtn" text="Bold" accelerator="Ctrl+B"/>
+                    <RadioMenuItem fx:id="topItalicBtn" text="Italic" accelerator="Ctrl+I" />
+                    <RadioMenuItem fx:id="topUnderlineBtn" text="Underline" accelerator="Ctrl+U" />
                     <Menu text="Size">
                         <CustomMenuItem>
                             <content>
@@ -90,6 +93,7 @@
 
 
         </HBox>
+
     </top>
 
     <center>
@@ -119,6 +123,23 @@
 
             <HBox style="-fx-padding: 3 10 3 10;">
                 <Label fx:id="showTotal" text="0 characters, 0 words" prefWidth="160"/>
+            </HBox>
+
+            <Region HBox.hgrow="ALWAYS"/>
+
+            <HBox alignment="CENTER_RIGHT" BorderPane.alignment="BOTTOM_RIGHT" style="-fx-padding: 3 10 3 10" spacing="8">
+                <HBox alignment="CENTER_RIGHT" spacing="2">
+                    <Label fx:id="yellowHltsLbl" style="-fx-text-fill: black;-fx-font-size: 13;" text="0"/>
+                    <Rectangle style="-fx-fill: #ffff00" width="15" height="15"/>
+                </HBox>
+                <HBox alignment="CENTER_RIGHT" spacing="2">
+                    <Label fx:id="greenHltsLbl" style="-fx-text-fill: black;-fx-font-size: 13;" text="0"/>
+                    <Rectangle style="-fx-fill: #51cc90" width="15" height="15"/>
+                </HBox>
+                <HBox alignment="CENTER_RIGHT" spacing="2">
+                    <Label fx:id="redHltsLbl" style="-fx-text-fill: black;-fx-font-size: 13;" text="0"/>
+                    <Rectangle style="-fx-fill: #ff6347" width="15" height="15"/>
+                </HBox>
             </HBox>
 
         </HBox>

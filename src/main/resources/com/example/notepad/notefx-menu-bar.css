@@ -91,6 +91,7 @@
     -fx-border-width: 1;
     -fx-border-color: #acacac;
     -fx-background-radius: 3;
+
 }
 .topButtonStyle:pressed{
     -fx-background-color: #d6d6d6;

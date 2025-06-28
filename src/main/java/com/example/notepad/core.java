@@ -52,7 +52,11 @@ public class core {
     public RadioMenuItem topUnderlineBtn;
     public RadioMenuItem topItalicBtn;
     public RadioMenuItem topBoldBtn;
-
+    public Label redHltsLbl;
+    public Label greenHltsLbl;
+    public Label yellowHltsLbl;
+    public HBox customTabBar;
+    List<Integer> lines;
 
     //    private ColorPicker colorPickDialog;
     private Popup formatPopup;
@@ -67,6 +71,8 @@ public class core {
     private OptFile_handler fileHandler;
     // Class-level variable to keep track
     private OptEdit_handler editHandler;
+
+
 
     public static void showFindDialog() {
         Popup popup = new Popup();
@@ -128,7 +134,9 @@ public class core {
             return;
         }
         codeArea.selectRange(index, index + query.length());
-        codeArea.requestFocus();
+
+        if (!codeArea.isFocused()) codeArea.requestFocus();
+
     }
 
     private static void replaceSelected(String replacement) {
@@ -188,7 +196,7 @@ public class core {
         });
         codeArea.caretPositionProperty().addListener((_, _, _) -> {
             updateStatusBar();
-            codeArea.requestFocus();
+            if (!codeArea.isFocused()) codeArea.requestFocus();
         });
 
         autoSaveDelayField.textProperty().addListener((_, _, newText) -> {
@@ -229,24 +237,24 @@ public class core {
                 }
             }));
 
-            codeArea.requestFocus();
+            if (!codeArea.isFocused()) codeArea.requestFocus();
+
         });
 
 
-        codeArea.requestFocus();
+        if (!codeArea.isFocused()) codeArea.requestFocus();
 
 
         setupBackgroundMenu();
 
         fontSizeTF_top.setOnAction(_->{
             codeArea.setStyle("-fx-font-size: "+fontSizeTF_top.getText());
-            codeArea.requestFocus();
+
+            if (!codeArea.isFocused()) codeArea.requestFocus();
+
         });
 
         fontSizeTopHandle();
-
-
-
 
         Platform.runLater(() -> codeArea.requestFocus());
 
@@ -338,14 +346,18 @@ public class core {
                 } else {
                     lineColorMap.remove(lineIndex);
                 }
-
+                updateHighlightCounts();
                 refreshLineNumbers();
             });
 
             return label;
         };
     }
-
+    private void updateHighlightCounts() {
+        yellowHltsLbl.setText(String.valueOf(colorGroups.get("YELLOW").size()));
+        greenHltsLbl.setText(String.valueOf(colorGroups.get("GREEN").size()));
+        redHltsLbl.setText(String.valueOf(colorGroups.get("RED").size()));
+    }
     private String getNextColor(String current) {
         if (current == null || !colorCycle.contains(current)) return colorCycle.getFirst();
         int index = colorCycle.indexOf(current);
@@ -380,7 +392,8 @@ public class core {
     public void highlightsMenu_red()    { showHighlightDialog("RED"); }
 
     private void showHighlightDialog(String color) {
-        List<Integer> lines = colorGroups.getOrDefault(color, List.of());
+
+        lines = colorGroups.getOrDefault(color, List.of());
 
         if (lines.isEmpty()) {
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
@@ -390,7 +403,6 @@ public class core {
             alert.showAndWait();
             return;
         }
-
         ChoiceDialog<Integer> dialog = new ChoiceDialog<>(lines.getFirst(), lines);
         dialog.setTitle("Go to Highlighted Line");
         dialog.setHeaderText("Highlighted lines in " + color);
@@ -540,7 +552,9 @@ public class core {
         colorPicker.setOnAction(_ -> {
             Color selected = colorPicker.getValue();
             codeArea.setStyle("-fx-background-color: " + toRgba(selected) + ";");
-            codeArea.requestFocus();
+
+            if (!codeArea.isFocused()) codeArea.requestFocus();
+
             colorPickerItem.hideOnClickProperty().set(true);
         });
 
@@ -560,17 +574,11 @@ public class core {
     }
 
     public void fontSizeTopHandle() {
-        topBoldBtn.setOnAction(_ ->{
-            applyStyle(codeArea, "bold", topBoldBtn.isSelected());
-        });
+        topBoldBtn.setOnAction(_ -> applyStyle(codeArea, "bold", topBoldBtn.isSelected()));
 
-        topItalicBtn.setOnAction(_ ->{
-            applyStyle(codeArea, "italic", topItalicBtn.isSelected());
-        });
+        topItalicBtn.setOnAction(_ -> applyStyle(codeArea, "italic", topItalicBtn.isSelected()));
 
-        topUnderlineBtn.setOnAction(_ ->{
-            applyStyle(codeArea, "underline", topUnderlineBtn.isSelected());
-        });
+        topUnderlineBtn.setOnAction(_ -> applyStyle(codeArea, "underline", topUnderlineBtn.isSelected()));
 
     }
 
@@ -580,13 +588,16 @@ public class core {
         int start = range.getStart();
         int end = range.getEnd();
 
+
+
         if (start == end) {
             start = 0;
             end=codeArea.getText().length();
-        }; // no selection
+        }
 
+        Collection<String> existing;
         for (int i = start; i < end; i++) {
-            Collection<String> existing = new ArrayList<>(codeArea.getStyleOfChar(i));
+            existing = new ArrayList<>(codeArea.getStyleOfChar(i));
             if (enable) {
                 if (!existing.contains(styleClass)) {
                     existing.add(styleClass);
@@ -599,4 +610,7 @@ public class core {
 
         Platform.runLater(codeArea::requestFocus);
     }
+
+
+
 }

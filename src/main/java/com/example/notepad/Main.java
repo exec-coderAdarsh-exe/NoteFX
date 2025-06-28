@@ -31,6 +31,7 @@ public class Main extends Application {
         FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("main_ui.fxml"));
         Scene scene = new Scene(fxmlLoader.load(), width, height);
 
+
         core controller = fxmlLoader.getController();
         stage.setTitle("NoteFX");
         stage.setScene(scene);
