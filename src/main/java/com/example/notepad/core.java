@@ -6,6 +6,8 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
@@ -72,9 +74,44 @@ public class core {
     // Class-level variable to keep track
     private OptEdit_handler editHandler;
 
+    private static void findNext(String query) {
+        if (query == null || query.isEmpty()) return;
 
+        String text = codeArea.getText();
+        int startIndex = codeArea.getCaretPosition();
+        int index = text.indexOf(query, startIndex);
+        if (index == -1 && startIndex > 0) {
+            index = text.indexOf(query);
+        }
+        if (index == -1) {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Not Found");
+            alert.setHeaderText(null);
+            alert.setContentText("No occurrences of \"" + query + "\" found.");
+            alert.show();
+            return;
+        }
+        codeArea.selectRange(index, index + query.length());
 
-    public static void showFindDialog() {
+        if (!codeArea.isFocused()) codeArea.requestFocus();
+
+    }
+
+    private static void replaceSelected(String replacement) {
+        if (codeArea.getSelectedText().isEmpty()) return;
+
+        codeArea.replaceSelection(replacement);
+    }
+
+    private static void replaceAll(String searchText, String replacement) {
+        if (searchText == null || searchText.isEmpty()) return;
+
+        String content = codeArea.getText();
+        String updated = content.replace(searchText, replacement);
+        codeArea.replaceText(updated);
+    }
+
+    public void showFindDialog() {
         Popup popup = new Popup();
         popup.setAutoHide(true);
         popup.setAutoFix(true);
@@ -114,43 +151,6 @@ public class core {
         closeButton.setOnAction(_ -> popup.hide());
         Stage stage = (Stage) codeArea.getScene().getWindow();
         popup.show(stage);
-    }
-
-    private static void findNext(String query) {
-        if (query == null || query.isEmpty()) return;
-
-        String text = codeArea.getText();
-        int startIndex = codeArea.getCaretPosition();
-        int index = text.indexOf(query, startIndex);
-        if (index == -1 && startIndex > 0) {
-            index = text.indexOf(query);
-        }
-        if (index == -1) {
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setTitle("Not Found");
-            alert.setHeaderText(null);
-            alert.setContentText("No occurrences of \"" + query + "\" found.");
-            alert.show();
-            return;
-        }
-        codeArea.selectRange(index, index + query.length());
-
-        if (!codeArea.isFocused()) codeArea.requestFocus();
-
-    }
-
-    private static void replaceSelected(String replacement) {
-        if (codeArea.getSelectedText().isEmpty()) return;
-
-        codeArea.replaceSelection(replacement);
-    }
-
-    private static void replaceAll(String searchText, String replacement) {
-        if (searchText == null || searchText.isEmpty()) return;
-
-        String content = codeArea.getText();
-        String updated = content.replace(searchText, replacement);
-        codeArea.replaceText(updated);
     }
 
     // REPLACE THIS METHOD
@@ -255,6 +255,11 @@ public class core {
         });
 
         fontSizeTopHandle();
+        codeArea.addEventFilter(KeyEvent.KEY_PRESSED, e -> {
+            if (e.isControlDown() && e.getCode() == KeyCode.F) {
+                showFindDialog();
+            }
+        });
 
         Platform.runLater(() -> codeArea.requestFocus());
 
@@ -610,7 +615,4 @@ public class core {
 
         Platform.runLater(codeArea::requestFocus);
     }
-
-
-
 }

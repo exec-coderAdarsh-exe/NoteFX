@@ -116,8 +116,6 @@ public class suggestion_handler {
             }
             else codeArea.requestFocus();
 
-            if (event.isControlDown()  && event.getCode()==KeyCode.F) core.showFindDialog();
-
             Platform.runLater(() -> {
                 Stage stage = (Stage) codeArea.getScene().getWindow();
                 stage.setOnCloseRequest(e -> {

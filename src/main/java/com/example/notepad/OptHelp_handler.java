@@ -6,6 +6,7 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -26,10 +27,14 @@ public class OptHelp_handler {
 
     public OptHelp_handler() {
         helpStage = new Stage();
-        helpStage.setTitle("Help - Notepad");
+
+        Image icon=new Image(Objects.requireNonNull(getClass().getResourceAsStream("/com/example/notepad/help.png")));
+        helpStage.getIcons().add(icon);
+
+        helpStage.setTitle("Help - NoteFx");
+        helpStage.setHeight(350);
+        helpStage.setWidth(800);
         helpStage.initModality(Modality.APPLICATION_MODAL);
-        helpStage.setMinWidth(750);
-        helpStage.setMinHeight(400);
         helpContent = loadHelpContent();
         searchField = new TextField();
         searchField.setPromptText("Search help topics...");
@@ -59,55 +64,109 @@ public class OptHelp_handler {
 
         content.put("About Notepad",
                 """
-                        NoteFX
+                        NoteFx
                         Advanced Notepad built using JavaFx
                        \s
-                        This Notepad Application is a sophisticated text editor built using JavaFX and RichTextFX.
+                        NoteFx Application is a sophisticated text editor built using JavaFX and RichTextFX.
                         It combines essential editing functionalities with advanced features designed to enhance productivity and ease of use. This project showcases a robust, user-friendly interface tailored for efficient text manipulation.
                        \s
                         Features :\s
-                        Rich Text Editing
-                        Customizable fonts and font sizes to suit user preferences.
-                        Text Suggestions (current file based)
-                        File Operations
-                        Line Numbering & Highlighting - Click numbers for highlighting it so that you make keep it for some reminder.
-                        Find and Replace
-                        Draft System - Auto-save drafts every 3 minutes
+                        - Rich Text Editing
+                        - Customizable fonts and font sizes to suit user preferences.
+                        - Text Suggestions (current-file based)
+                        - File Operations
+                        - Line Numbering & Highlighting - Click numbers for highlighting it so that you make keep it for some REMINDER.
+                        - Find and Replace
+                        - Draft System - Auto-save drafts every 2 minutes
                        \s
-                        Installation Ensure you have Java 11 or higher installed
+                        Installation : Ensure you have Java 11 or higher installed
                        \s
-                        The application auto-saves drafts periodically to prevent data loss.
+                        The application auto-saves drafts periodically to prevent data loss
+                        Default path is " C:\\Users\\your-username\\Documents\\NoteFx Drafts "
                        \s
                        \s
-                        About the Developer : Aditya — A committed student and aspiring software developer focused on creating practical and efficient applications.This Notepad project represents a step toward mastering JavaFX and advanced UI development.
+                        About the Developer : Aditya — A committed student and aspiring software developer focused on creating practical and efficient applications.This NoteFx Application marks the first step in software development.
+                        Identification Credentials :
+                        Name : Aditya Kumar
+                        School : St. Joseph's School, Banka
+                        Board : CISCE Followed (ICSE & ISC)
+                        School pass-out Year : 2026 during session 2025-26
+                       \s
+                        Support mail : adityaraj13073@gmail.com
                        \s"""
         );
         content.put("Using the Editor",
                 """
-                        The editor supports basic text editing features:
-                        - Cut, Copy, Paste
+                        The editor supports text editing features:
+                        \s
+                        - Cut, Copy, Paste, Duplicate, Delete
+                        - Bold, Italic, Underline
                         - Select All
                         - Undo/Redo
-                        - Find and Replace (supports multi-line replacements)"""
+                        - Go To
+                        - Date & Time
+                        - Find and Replace
+                        - Line number highlighting"""
         );
         content.put("Keyboard Shortcuts",
                 """
-                        Common shortcuts include:
-                        Ctrl+N: New file
-                        Ctrl+S: Save file
-                        Ctrl+O: Open file
-                        Ctrl+F: Find text
+                        Shortcuts include:
+                        \s
+                        Ctrl+N: Create a New File
+                        Ctrl+O: Open a File
+                        Ctrl+S: Save the current Document
+                        Ctrl+Shift+S: Save the Document As
+                        Ctrl+P: Print the Document
+                        Alt+F4: Exit the Application
+                        
+                        F5: Paste current Date & Time
+                        Ctrl+A: Select All
+                        Ctrl+T: Go to specific line
+                        Ctrl+F: Find/Replace some text
+                        Ctrl+D: Duplicate the selection
+                        Delete: Delete selected text
+                        Ctrl+X: Cut the selection
+                        Ctrl+C: Copy the selection
+                        Ctrl+V: Paste the selection
                         Ctrl+Z: Undo
                         Ctrl+Y: Redo
+                        
+                        F4: Change the Font
+                        F6: Wrap the Text
+                        
+                        F6: View On-Screen Keyboard
+                        F7: Toggle line numbering
+                        
+                        F2: Open Help Center
+                        
+                        Ctrl+1: Show line numbers highlighted in Yellow
+                        Ctrl+2: Show line numbers highlighted in Green
+                        Ctrl+3: Show line numbers highlighted in Red
+                        
+                        Ctrl+B: Bold selected text or whole document
+                        Ctrl+I: Italic selected text or whole document
+                        Ctrl+U: Underline selected text or whole document
+                        
                         """
         );
         content.put("Troubleshooting",
                 """
                         If you encounter issues:
+                        \s
                         - Ensure you have proper write permissions to the save location.
+                        - Ensure you have at-least JAVA 17 on your system.
                         - If the app crashes, restart it and try again.
-                        - Report bugs via the provided feedback form."""
+                        - Report bugs to the support mail."""
         );
+        content.put("Regarding updating the Application",
+                """
+                        For any update in the application, please visit the following URL:
+                        
+                        https://github.com/exec-coderAdarsh-exe/NoteFx
+                        
+                        and keep an eye on releases section.
+                        """);
+
 
         return content;
     }

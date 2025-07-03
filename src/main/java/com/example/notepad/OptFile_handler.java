@@ -168,6 +168,7 @@ public class OptFile_handler {
 
     public void printFile() {
         PrinterJob job = PrinterJob.createPrinterJob();
+
         if (job == null) {
             showError("Print Error", "Printer unavailable", "No printer found.");
             return;

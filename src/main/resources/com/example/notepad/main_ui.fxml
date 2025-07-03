@@ -37,7 +37,7 @@
                     <MenuItem text="Date &amp; Time" onAction="#EditMenu_date_time" accelerator="F5"/>
                     <MenuItem text="Select all" onAction="#EditMenu_selectAll" accelerator="Ctrl+A"/>
                     <MenuItem text="Go to" onAction="#EditMenu_goTo" accelerator="Ctrl+T"/>
-                    <MenuItem text="Find" accelerator="Ctrl+F"/>
+                    <MenuItem text="Find" onAction="#showFindDialog" accelerator="Ctrl+F"/>
                     <MenuItem text="Duplicate" onAction="#EditMenu_copy_paste" accelerator="Ctrl+D"/>
                     <MenuItem text="Delete" onAction="#EditMenu_delete" accelerator="delete"/>
                     <MenuItem text="Cut" onAction="#EditMenu_cut" accelerator="Ctrl+X"/>
@@ -51,7 +51,7 @@
                 <Menu text="Format">
                     <MenuItem text="Font" onAction="#FormatMenu_font" accelerator="F4"/>
                     <Menu text="Set Background" fx:id="backgroundMenu" styleClass="bgMenuOpt"/>
-                    <RadioMenuItem text="Wrap Text" fx:id="toggleWrapText" accelerator="F5"/>
+                    <RadioMenuItem text="Wrap Text" fx:id="toggleWrapText" accelerator="F6"/>
                 </Menu>
 
                 <!--            View menu-->
@@ -89,7 +89,7 @@
 
             </MenuBar>
 
-
+            <Region HBox.hgrow="ALWAYS"/>
 
 
         </HBox>

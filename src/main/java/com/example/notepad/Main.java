@@ -4,11 +4,13 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -31,13 +33,13 @@ public class Main extends Application {
         FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("main_ui.fxml"));
         Scene scene = new Scene(fxmlLoader.load(), width, height);
 
+        Image icon=new Image(Objects.requireNonNull(getClass().getResourceAsStream("/com/example/notepad/notepad.png")));
+        stage.getIcons().add(icon);
 
         core controller = fxmlLoader.getController();
-        stage.setTitle("NoteFX");
+        stage.setTitle("NoteFx");
         stage.setScene(scene);
         stage.show();
-        stage.setMinWidth(450);
-        stage.setMinHeight(150);
 
         ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
